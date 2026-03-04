@@ -232,6 +232,14 @@ export default function DashboardPage() {
       </div>
 
       <CreateRouletteModal open={showCreate} onClose={() => setShowCreate(false)} />
+
+      {/* Footer */}
+      <footer className="max-w-2xl mx-auto px-4 mt-4 text-center">
+        <button onClick={() => router.push('/legal')}
+          className="text-xs text-slate-600 hover:text-slate-400 transition-colors">
+          Mentions légales & RGPD
+        </button>
+      </footer>
     </div>
   );
 }

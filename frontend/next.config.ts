@@ -27,8 +27,10 @@ const nextConfig: NextConfig = {
         headers: [
           { key: "X-Content-Type-Options", value: "nosniff" },
           { key: "X-Frame-Options", value: "DENY" },
-          { key: "X-XSS-Protection", value: "1; mode=block" },
+          { key: "X-XSS-Protection", value: "0" }, // désactivé au profit de CSP
           { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
+          { key: "Strict-Transport-Security", value: "max-age=31536000; includeSubDomains" },
+          { key: "Permissions-Policy", value: "geolocation=(), microphone=(), camera=(), payment=()" },
           {
             key: "Content-Security-Policy",
             value: [
@@ -37,7 +39,7 @@ const nextConfig: NextConfig = {
               "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
               "font-src 'self' https://fonts.gstatic.com",
               "img-src 'self' data: https://lh3.googleusercontent.com",
-              "connect-src 'self' http://localhost:8080 ws://localhost:8080 https://accounts.google.com",
+              `connect-src 'self' ${process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:8080'} ${(process.env.NEXT_PUBLIC_WS_URL ?? 'ws://localhost:8080').replace('http', 'ws')} https://accounts.google.com`,
               "frame-src https://accounts.google.com",
             ].join("; "),
           },

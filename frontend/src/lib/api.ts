@@ -42,6 +42,15 @@ api.interceptors.response.use(
   async (error) => {
     const originalRequest = error.config;
 
+    // Rate limit — afficher un toast dédié (import dynamique pour éviter les dépendances circulaires)
+    if (error.response?.status === 429) {
+      const retryAfter = error.response.headers['retry-after'] ?? '60';
+      import('@/components/ui/Toast').then(({ toast }) => {
+        toast.error('Trop vite !', `Attendez ${retryAfter}s avant de recommencer.`);
+      });
+      return Promise.reject(error);
+    }
+
     if (error.response?.status !== 401 || originalRequest._retry) {
       return Promise.reject(error);
     }
