@@ -41,17 +41,17 @@ public class SecurityConfig {
                 .cors(c -> c.configurationSource(corsConfigurationSource()))
 
                 // ─── Headers de sécurité ──────────────────────────────────────
-                .headers(h -> h
-                        .frameOptions(f -> f.deny())
-                        .xssProtection(x -> x.disable()) // géré par CSP
-                        .httpStrictTransportSecurity(hsts -> hsts
+                .headers(h -> {
+                        h.frameOptions(f -> f.deny());
+                        h.xssProtection(x -> x.disable());
+                        h.httpStrictTransportSecurity(hsts -> hsts
                                 .includeSubDomains(true)
-                                .maxAgeInSeconds(31_536_000))
-                        .permissionsPolicy(p -> p.policy(
-                                "geolocation=(), microphone=(), camera=(), payment=()"))
-                        .referrerPolicy(r -> r.policy(
-                                ReferrerPolicyHeaderWriter.ReferrerPolicy.STRICT_ORIGIN_WHEN_CROSS_ORIGIN))
-                        .contentSecurityPolicy(c -> c.policyDirectives(
+                                .maxAgeInSeconds(31_536_000));
+                        h.addHeaderWriter(new ReferrerPolicyHeaderWriter(
+                                ReferrerPolicyHeaderWriter.ReferrerPolicy.STRICT_ORIGIN_WHEN_CROSS_ORIGIN));
+                        h.permissionsPolicy(p -> p.policy(
+                                "geolocation=(), microphone=(), camera=(), payment=()"));
+                        h.contentSecurityPolicy(c -> c.policyDirectives(
                                 "default-src 'none'; " +
                                 "base-uri 'self'; " +
                                 "script-src 'self'; " +
@@ -60,8 +60,8 @@ public class SecurityConfig {
                                 "font-src 'self'; " +
                                 "connect-src 'self'; " +
                                 "frame-ancestors 'none'; " +
-                                "form-action 'self'"))
-                )
+                                "form-action 'self'"));
+                })
 
                 // ─── Endpoints publics vs protégés ────────────────────────────
                 .authorizeHttpRequests(auth -> auth

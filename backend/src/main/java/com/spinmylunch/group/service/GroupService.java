@@ -68,7 +68,7 @@ public class GroupService {
                 .build());
 
         gamificationService.awardXpAndCheckBadges(
-                user, GamificationService.XP_INVITE, null);
+                user, GamificationService.XP_INVITE_ACCEPTED, null);
 
         int count = memberRepository.countByGroupId(group.getId());
         return toResponse(group, count);

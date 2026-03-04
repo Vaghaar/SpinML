@@ -30,7 +30,7 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class AuthService {
 
-    static final String REFRESH_COOKIE_NAME = "refresh_token";
+    public static final String REFRESH_COOKIE_NAME = "refresh_token";
 
     private final GoogleOAuthService      googleOAuthService;
     private final JwtService              jwtService;
