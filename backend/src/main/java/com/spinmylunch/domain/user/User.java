@@ -22,8 +22,12 @@ public class User {
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
-    @Column(name = "google_id", nullable = false, unique = true)
+    @Column(name = "google_id", unique = true)
     private String googleId;
+
+    @Column(name = "is_guest", nullable = false)
+    @Builder.Default
+    private Boolean isGuest = false;
 
     @Column(nullable = false, unique = true)
     private String email;

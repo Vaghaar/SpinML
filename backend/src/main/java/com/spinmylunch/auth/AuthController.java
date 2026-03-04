@@ -38,6 +38,15 @@ public class AuthController {
     }
 
     /**
+     * POST /api/v1/auth/guest
+     * Crée une session invité sans compte Google.
+     */
+    @PostMapping("/guest")
+    public ResponseEntity<AuthResponse> loginAsGuest(HttpServletResponse response) {
+        return ResponseEntity.ok(authService.createGuestSession(response));
+    }
+
+    /**
      * POST /api/v1/auth/refresh
      * Émet un nouveau access token depuis le refresh token (httpOnly cookie).
      */

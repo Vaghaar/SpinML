@@ -20,7 +20,8 @@ public record AuthResponse(
             int    xp,
             int    streakCount,
             FoodAvatar foodAvatarType,
-            UserTheme  theme
+            UserTheme  theme,
+            boolean isGuest
     ) {}
 
     public static AuthResponse of(String token, long expiresIn, UserDto user) {

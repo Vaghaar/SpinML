@@ -220,6 +220,20 @@ public class AuthService {
         response.addHeader("Set-Cookie", cookie);
     }
 
+    // ─── Connexion invité ─────────────────────────────────────────────────────
+
+    @Transactional
+    public AuthResponse createGuestSession(HttpServletResponse response) {
+        String uid = UUID.randomUUID().toString().substring(0, 6).toUpperCase();
+        User guest = userRepository.save(User.builder()
+                .email("guest_" + UUID.randomUUID() + "@spinmylunch.local")
+                .name("Invité #" + uid)
+                .isGuest(true)
+                .foodAvatarType(User.randomAvatar())
+                .build());
+        return buildAuthResponse(guest, response);
+    }
+
     private AuthResponse.UserDto toUserDto(User user) {
         return new AuthResponse.UserDto(
                 user.getId(),
@@ -230,7 +244,8 @@ public class AuthService {
                 user.getXp(),
                 user.getStreakCount(),
                 user.getFoodAvatarType(),
-                user.getTheme()
+                user.getTheme(),
+                Boolean.TRUE.equals(user.getIsGuest())
         );
     }
 

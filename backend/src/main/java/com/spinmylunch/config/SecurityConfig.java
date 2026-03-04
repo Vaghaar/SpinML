@@ -67,6 +67,7 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         // Auth
                         .requestMatchers(HttpMethod.POST, "/api/v1/auth/google").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/api/v1/auth/guest").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/v1/auth/refresh").permitAll()
                         // Actuator (health public, autres protégés)
                         .requestMatchers("/actuator/health").permitAll()
