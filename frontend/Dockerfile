@@ -12,7 +12,7 @@ ENV NEXT_TELEMETRY_DISABLED=1
 
 # Copier les manifestes de dépendances
 COPY package*.json ./
-RUN npm ci --prefer-offline
+RUN npm ci
 
 # Copier le code source et builder
 COPY . .
