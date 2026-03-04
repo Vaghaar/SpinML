@@ -82,7 +82,7 @@ public class VoteNotificationService {
 
     // ─── Calcul des résultats ─────────────────────────────────────────────────
 
-    List<LiveVoteUpdate.OptionResult> computeOptionResults(
+    public List<LiveVoteUpdate.OptionResult> computeOptionResults(
             List<VoteOption> options, List<Vote> votes, VoteMode mode) {
 
         // Regrouper les votes par option

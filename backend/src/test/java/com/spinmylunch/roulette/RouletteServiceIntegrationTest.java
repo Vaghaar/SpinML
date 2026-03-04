@@ -51,9 +51,9 @@ class RouletteServiceIntegrationTest {
                 RouletteMode.EQUAL,
                 false,
                 List.of(
-                        new SegmentDto("Pizza", BigDecimal.ONE, null),
-                        new SegmentDto("Sushi", BigDecimal.ONE, null),
-                        new SegmentDto("Burger", BigDecimal.ONE, null)
+                        new SegmentDto(null, "Pizza", BigDecimal.ONE, "#FF6B35", 0),
+                        new SegmentDto(null, "Sushi", BigDecimal.ONE, "#FFD700", 1),
+                        new SegmentDto(null, "Burger", BigDecimal.ONE, "#4ECDC4", 2)
                 )
         );
 
@@ -115,9 +115,9 @@ class RouletteServiceIntegrationTest {
                 RouletteMode.EQUAL,
                 false,
                 List.of(
-                        new SegmentDto("A", BigDecimal.ONE, null),
-                        new SegmentDto("B", BigDecimal.ONE, null),
-                        new SegmentDto("C", BigDecimal.ONE, null)
+                        new SegmentDto(null, "A", BigDecimal.ONE, "#FF6B35", 0),
+                        new SegmentDto(null, "B", BigDecimal.ONE, "#FFD700", 1),
+                        new SegmentDto(null, "C", BigDecimal.ONE, "#4ECDC4", 2)
                 )
         ), testUser);
     }
