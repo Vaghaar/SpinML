@@ -68,7 +68,7 @@ spring:
 # ─── Application custom ────────────────────────────────────────────────────
 app:
   jwt:
-    secret: ${JWT_SECRET}
+    secret: ${JWT_SECRET:AhMd9t1X1r7Wgu4lyUdepPQX92+yHUyAWrM9muwLHTg=}
     access-token-expiration: 900         # 15 minutes en secondes
     refresh-token-expiration: 604800     # 7 jours en secondes
   frontend-url: ${FRONTEND_URL:http://localhost:3000}
