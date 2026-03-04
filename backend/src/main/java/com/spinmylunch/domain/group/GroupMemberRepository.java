@@ -18,6 +18,8 @@ public interface GroupMemberRepository extends JpaRepository<GroupMember, UUID> 
 
     int countByGroupId(UUID groupId);
 
+    List<GroupMember> findByUserId(UUID userId);
+
     @Query("SELECT gm FROM GroupMember gm WHERE gm.group.id = :groupId AND gm.user.id = :userId AND gm.role = 'ADMIN'")
     Optional<GroupMember> findAdminMembership(@Param("groupId") UUID groupId, @Param("userId") UUID userId);
 }

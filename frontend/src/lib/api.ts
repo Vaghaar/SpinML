@@ -103,9 +103,11 @@ export const authApi = {
 // ─── Endpoints Roulettes ──────────────────────────────────────────────────────
 
 export const rouletteApi = {
+  getMyRoulettes: () => api.get('/roulettes'),
   create:     (data: unknown) => api.post('/roulettes', data),
   getById:    (id: string)    => api.get(`/roulettes/${id}`),
   update:     (id: string, data: unknown) => api.put(`/roulettes/${id}`, data),
+  delete:     (id: string)    => api.delete(`/roulettes/${id}`),
   spin:       (id: string)    => api.post(`/roulettes/${id}/spin`),
   getHistory: (id: string, page = 0, size = 20) =>
     api.get(`/roulettes/${id}/history`, { params: { page, size } }),
@@ -123,10 +125,10 @@ export const voteApi = {
 // ─── Endpoints Groupes ────────────────────────────────────────────────────────
 
 export const groupApi = {
+  getMyGroups:   () => api.get('/groups'),
   create:        (data: unknown) => api.post('/groups', data),
   getById:       (id: string)    => api.get(`/groups/${id}`),
-  join:          (id: string, inviteCode: string) =>
-    api.post(`/groups/${id}/join`, { inviteCode }),
+  join:          (inviteCode: string) => api.post('/groups/join', { inviteCode }),
   getMembers:    (id: string)    => api.get(`/groups/${id}/members`),
   removeMember:  (groupId: string, userId: string) =>
     api.delete(`/groups/${groupId}/members/${userId}`),

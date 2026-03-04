@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.net.URI;
+import java.util.List;
 import java.util.UUID;
 
 @RestController
@@ -19,6 +20,25 @@ import java.util.UUID;
 public class RouletteController {
 
     private final RouletteService rouletteService;
+
+    /**
+     * GET /api/v1/roulettes
+     * Liste les roulettes de l'utilisateur courant.
+     */
+    @GetMapping
+    public ResponseEntity<List<RouletteResponse>> getMyRoulettes(@CurrentUser User user) {
+        return ResponseEntity.ok(rouletteService.getMyRoulettes(user));
+    }
+
+    /**
+     * DELETE /api/v1/roulettes/:id
+     * Supprime une roulette (créateur uniquement).
+     */
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> delete(@PathVariable UUID id, @CurrentUser User user) {
+        rouletteService.delete(id, user);
+        return ResponseEntity.noContent().build();
+    }
 
     /**
      * POST /api/v1/roulettes

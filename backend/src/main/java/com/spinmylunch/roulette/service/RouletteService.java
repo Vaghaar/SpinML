@@ -77,6 +77,26 @@ public class RouletteService {
         return toResponse(roulette);
     }
 
+    // ─── Lister mes roulettes ─────────────────────────────────────────────────
+
+    @Transactional(readOnly = true)
+    public List<RouletteResponse> getMyRoulettes(User user) {
+        return rouletteRepository.findByCreatorIdOrderByCreatedAtDesc(user.getId())
+                .stream().map(this::toResponse).toList();
+    }
+
+    // ─── Supprimer ────────────────────────────────────────────────────────────
+
+    @Transactional
+    public void delete(UUID id, User requester) {
+        Roulette roulette = rouletteRepository.findById(id)
+                .orElseThrow(() -> AppException.of(ErrorCode.ROULETTE_NOT_FOUND));
+        if (!roulette.getCreator().getId().equals(requester.getId())) {
+            throw AppException.of(ErrorCode.FORBIDDEN);
+        }
+        rouletteRepository.delete(roulette);
+    }
+
     // ─── Lire ────────────────────────────────────────────────────────────────
 
     @Transactional(readOnly = true)
