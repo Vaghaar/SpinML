@@ -1,0 +1,117 @@
+# ─────────────────────────────────────────────────────────────────────────────
+#  SpinMyLunch — Docker Compose PRODUCTION (Linux / VPS / CI)
+#  Utilise des Dockerfiles multi-stage (requiert internet dans Docker).
+#
+#  Usage :
+#    docker compose -f docker-compose.prod.yml up --build -d
+#
+#  Variables requises dans .env :
+#    JWT_SECRET, GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET,
+#    POSTGRES_PASSWORD, REDIS_PASSWORD,
+#    FRONTEND_URL, NEXT_PUBLIC_API_URL, NEXT_PUBLIC_WS_URL
+# ─────────────────────────────────────────────────────────────────────────────
+
+services:
+  # ─── PostgreSQL 16 ─────────────────────────────────────────────────────────
+  postgres:
+    image: postgres:16-alpine
+    container_name: spinmylunch_postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB:       ${POSTGRES_DB:-spinmylunch}
+      POSTGRES_USER:     ${POSTGRES_USER:-spinmylunch}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-spinmylunch}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - spinmylunch_net
+    # Pas de port exposé sur le host en prod (accès interne uniquement)
+
+  # ─── Redis 7 ───────────────────────────────────────────────────────────────
+  redis:
+    image: redis:7-alpine
+    container_name: spinmylunch_redis
+    restart: unless-stopped
+    command: redis-server --requirepass ${REDIS_PASSWORD} --appendonly yes
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "-a", "${REDIS_PASSWORD}", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - spinmylunch_net
+
+  # ─── Spring Boot Backend ───────────────────────────────────────────────────
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile.prod
+    container_name: spinmylunch_backend
+    restart: unless-stopped
+    environment:
+      SPRING_PROFILES_ACTIVE:       prod
+      SPRING_DATASOURCE_URL:        jdbc:postgresql://postgres:5432/${POSTGRES_DB:-spinmylunch}
+      SPRING_DATASOURCE_USERNAME:   ${POSTGRES_USER:-spinmylunch}
+      SPRING_DATASOURCE_PASSWORD:   ${POSTGRES_PASSWORD}
+      SPRING_DATA_REDIS_HOST:       redis
+      SPRING_DATA_REDIS_PORT:       6379
+      SPRING_DATA_REDIS_PASSWORD:   ${REDIS_PASSWORD}
+      JWT_SECRET:                   ${JWT_SECRET}
+      GOOGLE_CLIENT_ID:             ${GOOGLE_CLIENT_ID}
+      GOOGLE_CLIENT_SECRET:         ${GOOGLE_CLIENT_SECRET}
+      FRONTEND_URL:                 ${FRONTEND_URL}
+    ports:
+      - "8080:8080"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://localhost:8080/actuator/health || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 60s
+    networks:
+      - spinmylunch_net
+
+  # ─── Next.js Frontend ──────────────────────────────────────────────────────
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile.prod
+      args:
+        NEXT_PUBLIC_API_URL:          ${NEXT_PUBLIC_API_URL}
+        NEXT_PUBLIC_WS_URL:           ${NEXT_PUBLIC_WS_URL}
+        NEXT_PUBLIC_GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID}
+    container_name: spinmylunch_frontend
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    depends_on:
+      backend:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://localhost:3000/ || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+    networks:
+      - spinmylunch_net
+
+volumes:
+  postgres_data:
+  redis_data:
+
+networks:
+  spinmylunch_net:
+    driver: bridge
