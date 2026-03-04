@@ -54,8 +54,7 @@ public class User {
     private Instant lastActiveAt;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "food_avatar_type", nullable = false,
-            columnDefinition = "food_avatar")
+    @Column(name = "food_avatar_type", nullable = false)
     @Builder.Default
     private FoodAvatar foodAvatarType = FoodAvatar.PIZZA;
 
@@ -69,7 +68,7 @@ public class User {
     private Map<String, Object> preferencesJson = Map.of();
 
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false, columnDefinition = "user_theme")
+    @Column(nullable = false)
     @Builder.Default
     private UserTheme theme = UserTheme.DARK;
 

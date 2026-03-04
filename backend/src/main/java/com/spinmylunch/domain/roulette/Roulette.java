@@ -35,7 +35,7 @@ public class Roulette {
     private String name;
 
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false, columnDefinition = "roulette_mode")
+    @Column(nullable = false)
     @Builder.Default
     private RouletteMode mode = RouletteMode.EQUAL;
 

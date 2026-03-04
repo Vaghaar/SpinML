@@ -30,7 +30,7 @@ public class GroupMember {
     private User user;
 
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false, columnDefinition = "group_role")
+    @Column(nullable = false)
     @Builder.Default
     private GroupRole role = GroupRole.MEMBER;
 

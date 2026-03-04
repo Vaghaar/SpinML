@@ -32,12 +32,12 @@ public class VoteSession {
     private Group group;
 
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false, columnDefinition = "vote_mode")
+    @Column(nullable = false)
     @Builder.Default
     private VoteMode mode = VoteMode.MAJORITY;
 
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false, columnDefinition = "vote_status")
+    @Column(nullable = false)
     @Builder.Default
     private VoteStatus status = VoteStatus.ACTIVE;
 
