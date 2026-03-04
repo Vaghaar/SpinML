@@ -100,6 +100,12 @@ export const authApi = {
   export:   () => api.get('/auth/export', { responseType: 'blob' }),
 };
 
+// ─── Endpoints Profil / Gamification ─────────────────────────────────────────
+
+export const profileApi = {
+  getProfile: () => api.get('/profile'),
+};
+
 // ─── Endpoints Roulettes ──────────────────────────────────────────────────────
 
 export const rouletteApi = {

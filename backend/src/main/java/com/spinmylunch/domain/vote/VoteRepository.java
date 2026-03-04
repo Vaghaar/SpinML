@@ -21,4 +21,8 @@ public interface VoteRepository extends JpaRepository<Vote, UUID> {
 
     /** Vérifie si un utilisateur a déjà voté pour une option donnée dans MAJORITY mode. */
     boolean existsBySessionIdAndUserIdAndOptionId(UUID sessionId, UUID userId, UUID optionId);
+
+    /** Total de votes castés par un utilisateur. */
+    @Query("SELECT COUNT(v) FROM Vote v WHERE v.user.id = :userId")
+    long countByUserId(@Param("userId") UUID userId);
 }

@@ -102,9 +102,15 @@ export default function DashboardPage() {
       <div className="sticky top-0 z-10 bg-dark-bg/80 backdrop-blur-md border-b border-white/5">
         <div className="max-w-2xl mx-auto px-4 py-3 flex items-center justify-between">
           <span className="font-title font-bold text-primary-400 text-lg">🎡 SpinMyLunch</span>
-          <button onClick={logout} className="text-xs text-slate-500 hover:text-white transition-colors">
-            Déconnexion
-          </button>
+          <div className="flex items-center gap-3">
+            <button onClick={() => router.push('/profile')}
+              className="text-xs text-slate-400 hover:text-white transition-colors">
+              Profil
+            </button>
+            <button onClick={logout} className="text-xs text-slate-500 hover:text-white transition-colors">
+              Déconnexion
+            </button>
+          </div>
         </div>
       </div>
 
