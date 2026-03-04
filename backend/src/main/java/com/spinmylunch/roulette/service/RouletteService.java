@@ -12,6 +12,8 @@ import com.spinmylunch.domain.user.User;
 import com.spinmylunch.domain.user.UserRepository;
 import com.spinmylunch.gamification.service.GamificationService;
 import com.spinmylunch.roulette.dto.*;
+import com.spinmylunch.vote.dto.SpinSyncMessage;
+import com.spinmylunch.vote.service.VoteNotificationService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -41,9 +43,10 @@ public class RouletteService {
     private final GroupRepository       groupRepository;
     private final GroupMemberRepository groupMemberRepository;
     private final UserRepository        userRepository;
-    private final SpinService           spinService;
-    private final GamificationService   gamificationService;
-    private final RateLimitService      rateLimitService;
+    private final SpinService             spinService;
+    private final GamificationService     gamificationService;
+    private final RateLimitService        rateLimitService;
+    private final VoteNotificationService notificationService;
 
     // ─── Créer ───────────────────────────────────────────────────────────────
 
@@ -145,7 +148,7 @@ public class RouletteService {
             badgeUnlocked = new SpinResponse.BadgeUnlocked(b.getCode(), b.getName(), b.getIconUrl());
         }
 
-        return new SpinResponse(
+        SpinResponse spinResponse = new SpinResponse(
                 saved.getId(),
                 spinResult.winner().getId(),
                 spinResult.winner().getLabel(),
@@ -155,6 +158,24 @@ public class RouletteService {
                 badgeUnlocked,
                 saved.getCreatedAt()
         );
+
+        // Broadcast WebSocket à tous les membres du groupe (spin synchronisé)
+        if (roulette.getGroup() != null) {
+            SpinSyncMessage syncMsg = new SpinSyncMessage(
+                    roulette.getId(),
+                    saved.getId(),
+                    spinResult.winner().getId(),
+                    spinResult.winner().getLabel(),
+                    spinResult.winner().getColor(),
+                    spinResult.serverAngle(),
+                    user.getId(),
+                    user.getName(),
+                    saved.getCreatedAt()
+            );
+            notificationService.broadcastSpinResult(roulette.getGroup().getId(), syncMsg);
+        }
+
+        return spinResponse;
     }
 
     // ─── Historique ──────────────────────────────────────────────────────────
