@@ -1,23 +1,148 @@
-// Landing page — sera construite à l'étape 5 (Frontend: Landing + connexion Google)
-// Pour l'instant, stub de base fonctionnel
+'use client';
 
-export default function HomePage() {
+import { useEffect }          from 'react';
+import { useRouter }          from 'next/navigation';
+import { motion }             from 'framer-motion';
+import { RouletteCanvas }     from '@/components/landing/RouletteCanvas';
+import { GoogleSignInButton } from '@/components/landing/GoogleSignInButton';
+import { useAuthStore }       from '@/stores/authStore';
+
+// Stats de présentation
+const STATS = [
+  { label: 'Spins aujourd\'hui', value: '3 247' },
+  { label: 'Groupes actifs',     value: '612' },
+  { label: 'Dilemmes résolus',   value: '48K+' },
+];
+
+export default function LandingPage() {
+  const router          = useRouter();
+  const { isAuthenticated, isLoading } = useAuthStore();
+
+  // Rediriger si déjà authentifié
+  useEffect(() => {
+    if (!isLoading && isAuthenticated) {
+      router.replace('/dashboard');
+    }
+  }, [isAuthenticated, isLoading, router]);
+
   return (
-    <main className="flex min-h-dvh flex-col items-center justify-center gap-6 bg-dark-bg">
-      <h1 className="font-title text-5xl font-bold gradient-text">
-        SpinMyLunch
-      </h1>
-      <p className="font-body text-lg text-slate-400">
-        La roulette qui décide pour toi.
-      </p>
-      <div className="glass rounded-2xl px-8 py-4 neon-border">
-        <p className="text-slate-300 text-sm">
-          Backend API:{" "}
-          <code className="text-primary-400">
-            {process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8080"}
-          </code>
-        </p>
+    <main className="relative min-h-dvh flex flex-col items-center justify-center overflow-hidden bg-dark-bg">
+
+      {/* ─── Background : roue animée ─────────────────────────────────────── */}
+      <RouletteCanvas />
+
+      {/* ─── Overlay gradient pour lisibilité ────────────────────────────── */}
+      <div className="absolute inset-0 bg-gradient-to-b from-dark-bg via-dark-bg/60 to-transparent pointer-events-none" />
+
+      {/* ─── Contenu principal ────────────────────────────────────────────── */}
+      <div className="relative z-10 flex flex-col items-center text-center px-6 max-w-2xl mx-auto">
+
+        {/* Badge */}
+        <motion.div
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.1, duration: 0.5 }}
+          className="mb-6"
+        >
+          <span className="glass neon-border text-primary-400 text-sm font-accent px-4 py-1.5 rounded-full">
+            🎡 La roulette collaborative du midi
+          </span>
+        </motion.div>
+
+        {/* Titre */}
+        <motion.h1
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.2, duration: 0.6 }}
+          className="font-title text-6xl sm:text-7xl md:text-8xl font-bold mb-4 leading-none tracking-tight"
+        >
+          <span className="gradient-text">Spin</span>
+          <span className="text-white">My</span>
+          <span className="gradient-text">Lunch</span>
+        </motion.h1>
+
+        {/* Tagline */}
+        <motion.p
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.35, duration: 0.6 }}
+          className="font-body text-xl sm:text-2xl text-slate-300 mb-3"
+        >
+          La roulette qui décide pour toi.
+        </motion.p>
+
+        <motion.p
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.5, duration: 0.6 }}
+          className="font-body text-slate-500 mb-10 max-w-md"
+        >
+          Fini le "on mange quoi ?" qui dure 20 minutes. Crée ta roulette, invite ton équipe,
+          spinnez ensemble et passez à table.
+        </motion.p>
+
+        {/* CTA principal */}
+        <motion.div
+          initial={{ opacity: 0, scale: 0.9 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ delay: 0.6, duration: 0.5, type: 'spring', stiffness: 200 }}
+          className="mb-4"
+        >
+          <GoogleSignInButton size="lg" />
+        </motion.div>
+
+        {/* Note */}
+        <motion.p
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.8 }}
+          className="text-xs text-slate-600 mb-12"
+        >
+          Gratuit · Aucune carte requise · Connexion en un clic
+        </motion.p>
+
+        {/* Stats */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.9, duration: 0.5 }}
+          className="flex gap-8 sm:gap-16"
+        >
+          {STATS.map((stat) => (
+            <div key={stat.label} className="text-center">
+              <div className="font-accent text-2xl font-bold gradient-text">
+                {stat.value}
+              </div>
+              <div className="font-body text-xs text-slate-500 mt-0.5">
+                {stat.label}
+              </div>
+            </div>
+          ))}
+        </motion.div>
       </div>
+
+      {/* ─── Feature pills en bas ─────────────────────────────────────────── */}
+      <motion.div
+        initial={{ opacity: 0, y: 30 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 1.1, duration: 0.6 }}
+        className="relative z-10 flex flex-wrap justify-center gap-2 px-6 mt-10 mb-6"
+      >
+        {[
+          '🎰 Roulette pondérée',
+          '🗳️ Vote en temps réel',
+          '🔥 Streaks & badges',
+          '👥 Multi-joueurs',
+          '🎭 Mode Surprise',
+        ].map((pill) => (
+          <span
+            key={pill}
+            className="glass text-slate-400 text-xs font-body px-3 py-1.5 rounded-full border border-white/5"
+          >
+            {pill}
+          </span>
+        ))}
+      </motion.div>
     </main>
   );
 }

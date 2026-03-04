@@ -1,0 +1,133 @@
+import axios, { type AxiosInstance, type InternalAxiosRequestConfig } from 'axios';
+import { useAuthStore } from '@/stores/authStore';
+
+const BASE_URL = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:8080';
+
+// ─── Instance Axios principale ───────────────────────────────────────────────
+
+const api: AxiosInstance = axios.create({
+  baseURL:         `${BASE_URL}/api/v1`,
+  withCredentials: true,    // envoie le cookie refresh_token httpOnly
+  timeout:         15_000,
+  headers: { 'Content-Type': 'application/json' },
+});
+
+// ─── Intercepteur requête : inject Bearer token ───────────────────────────────
+
+api.interceptors.request.use((config: InternalAxiosRequestConfig) => {
+  const token = useAuthStore.getState().accessToken;
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`;
+  }
+  return config;
+});
+
+// ─── Intercepteur réponse : refresh automatique sur 401 ──────────────────────
+
+let isRefreshing = false;
+let pendingQueue: Array<{
+  resolve: (token: string) => void;
+  reject:  (err: unknown) => void;
+}> = [];
+
+function processQueue(error: unknown, token: string | null) {
+  pendingQueue.forEach(({ resolve, reject }) =>
+    error ? reject(error) : resolve(token!)
+  );
+  pendingQueue = [];
+}
+
+api.interceptors.response.use(
+  (response) => response,
+  async (error) => {
+    const originalRequest = error.config;
+
+    if (error.response?.status !== 401 || originalRequest._retry) {
+      return Promise.reject(error);
+    }
+
+    // Si un refresh est déjà en cours, mettre en file d'attente
+    if (isRefreshing) {
+      return new Promise((resolve, reject) => {
+        pendingQueue.push({
+          resolve: (token) => {
+            originalRequest.headers.Authorization = `Bearer ${token}`;
+            resolve(api(originalRequest));
+          },
+          reject,
+        });
+      });
+    }
+
+    originalRequest._retry = true;
+    isRefreshing = true;
+
+    try {
+      // Tenter le refresh — le cookie httpOnly est envoyé automatiquement
+      const { data } = await axios.post(
+        `${BASE_URL}/api/v1/auth/refresh`,
+        {},
+        { withCredentials: true }
+      );
+
+      const { accessToken, user } = data;
+      useAuthStore.getState().login(accessToken, user);
+      processQueue(null, accessToken);
+
+      originalRequest.headers.Authorization = `Bearer ${accessToken}`;
+      return api(originalRequest);
+    } catch (refreshError) {
+      processQueue(refreshError, null);
+      useAuthStore.getState().logout();
+      if (typeof window !== 'undefined') window.location.href = '/';
+      return Promise.reject(refreshError);
+    } finally {
+      isRefreshing = false;
+    }
+  }
+);
+
+export default api;
+
+// ─── Endpoints Auth ───────────────────────────────────────────────────────────
+
+export const authApi = {
+  googleLogin: (code: string, redirectUri: string) =>
+    api.post('/auth/google', { code, redirectUri }),
+  refresh:  () => api.post('/auth/refresh'),
+  logout:   () => api.post('/auth/logout'),
+  delete:   () => api.delete('/auth/account'),
+  export:   () => api.get('/auth/export', { responseType: 'blob' }),
+};
+
+// ─── Endpoints Roulettes ──────────────────────────────────────────────────────
+
+export const rouletteApi = {
+  create:     (data: unknown) => api.post('/roulettes', data),
+  getById:    (id: string)    => api.get(`/roulettes/${id}`),
+  update:     (id: string, data: unknown) => api.put(`/roulettes/${id}`, data),
+  spin:       (id: string)    => api.post(`/roulettes/${id}/spin`),
+  getHistory: (id: string, page = 0, size = 20) =>
+    api.get(`/roulettes/${id}/history`, { params: { page, size } }),
+};
+
+// ─── Endpoints Votes ──────────────────────────────────────────────────────────
+
+export const voteApi = {
+  createSession: (data: unknown) => api.post('/votes/sessions', data),
+  castVote:      (id: string, data: unknown) => api.post(`/votes/sessions/${id}/vote`, data),
+  getResults:    (id: string) => api.get(`/votes/sessions/${id}/results`),
+  closeSession:  (id: string) => api.post(`/votes/sessions/${id}/close`),
+};
+
+// ─── Endpoints Groupes ────────────────────────────────────────────────────────
+
+export const groupApi = {
+  create:        (data: unknown) => api.post('/groups', data),
+  getById:       (id: string)    => api.get(`/groups/${id}`),
+  join:          (id: string, inviteCode: string) =>
+    api.post(`/groups/${id}/join`, { inviteCode }),
+  getMembers:    (id: string)    => api.get(`/groups/${id}/members`),
+  removeMember:  (groupId: string, userId: string) =>
+    api.delete(`/groups/${groupId}/members/${userId}`),
+};
