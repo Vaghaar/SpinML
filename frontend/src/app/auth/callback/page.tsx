@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { motion } from 'framer-motion';
 import { authApi }      from '@/lib/api';
@@ -9,9 +9,7 @@ import { useAuthStore } from '@/stores/authStore';
 import { usePersistedAuth } from '@/stores/authStore';
 import { toast }        from '@/components/ui/Toast';
 
-type Phase = 'loading' | 'success' | 'error';
-
-export default function AuthCallbackPage() {
+function AuthCallbackInner() {
   const router       = useRouter();
   const params       = useSearchParams();
   const { login }    = useAuthStore();
@@ -95,5 +93,13 @@ export default function AuthCallbackPage() {
         </div>
       </motion.div>
     </div>
+  );
+}
+
+export default function AuthCallbackPage() {
+  return (
+    <Suspense>
+      <AuthCallbackInner />
+    </Suspense>
   );
 }
