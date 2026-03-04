@@ -1,0 +1,21 @@
+# Profil test — Testcontainers (PostgreSQL + Redis en conteneurs éphémères)
+spring:
+  datasource:
+    url: jdbc:tc:postgresql:16:///spinmylunch_test
+    driver-class-name: org.testcontainers.jdbc.ContainerDatabaseDriver
+  jpa:
+    hibernate:
+      ddl-auto: none
+  flyway:
+    enabled: true
+  data:
+    redis:
+      host: localhost
+      port: 6370
+      password: ""
+  cache:
+    type: simple
+
+logging:
+  level:
+    com.spinmylunch: DEBUG

@@ -1,0 +1,40 @@
+# ─── Variables d'environnement (NE JAMAIS COMMITTER) ─────────────────────────
+.env
+.env.local
+.env.*.local
+
+# ─── Java / Maven ─────────────────────────────────────────────────────────────
+backend/target/
+backend/.mvn/wrapper/maven-wrapper.jar
+*.class
+*.jar
+*.war
+*.ear
+
+# ─── Node / Next.js ───────────────────────────────────────────────────────────
+frontend/node_modules/
+frontend/.next/
+frontend/out/
+frontend/.env
+
+# ─── IDEs ─────────────────────────────────────────────────────────────────────
+.idea/
+*.iml
+.vscode/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# ─── OS ───────────────────────────────────────────────────────────────────────
+.DS_Store
+Thumbs.db
+
+# ─── Docker volumes ───────────────────────────────────────────────────────────
+postgres_data/
+redis_data/
+
+# ─── Logs ─────────────────────────────────────────────────────────────────────
+*.log
+logs/

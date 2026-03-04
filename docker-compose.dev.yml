@@ -1,0 +1,31 @@
+version: "3.9"
+
+# Surcharge pour le développement local — uniquement PostgreSQL + Redis
+# Usage : docker-compose -f docker-compose.dev.yml up
+
+services:
+  postgres:
+    ports:
+      - "5432:5432"
+
+  redis:
+    ports:
+      - "6379:6379"
+
+  backend:
+    build:
+      target: dev
+    volumes:
+      - ./backend:/workspace
+    environment:
+      SPRING_PROFILES_ACTIVE: dev
+    command: mvn spring-boot:run
+
+  frontend:
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+      - /app/.next
+    environment:
+      NODE_ENV: development
+    command: npm run dev
