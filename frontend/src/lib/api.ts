@@ -55,6 +55,12 @@ api.interceptors.response.use(
       return Promise.reject(error);
     }
 
+    // Ne jamais retenter le refresh lui-même (évite la boucle infinie)
+    if (originalRequest.url?.includes('/auth/refresh')) {
+      useAuthStore.getState().logout();
+      return Promise.reject(error);
+    }
+
     // Si un refresh est déjà en cours, mettre en file d'attente
     if (isRefreshing) {
       return new Promise((resolve, reject) => {
