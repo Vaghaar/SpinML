@@ -1,13 +1,22 @@
-# ─── Runtime JRE (image légère) ─────────────────────────────────────────────
+# ─── Build stage ────────────────────────────────────────────────────────────
+FROM maven:3.9-eclipse-temurin-21-alpine AS builder
+
+WORKDIR /app
+
+COPY pom.xml .
+RUN mvn dependency:go-offline -q
+
+COPY src ./src
+RUN mvn package -DskipTests -q
+
+# ─── Runtime stage ──────────────────────────────────────────────────────────
 FROM eclipse-temurin:21-jre-alpine AS runtime
 
 WORKDIR /app
 
-# Sécurité : utilisateur non-root
 RUN addgroup -S spring && adduser -S spring -G spring
 
-# Copier le JAR pré-compilé
-COPY target/spinmylunch-backend-0.1.0-SNAPSHOT.jar app.jar
+COPY --from=builder /app/target/spinmylunch-backend-0.1.0-SNAPSHOT.jar app.jar
 
 USER spring:spring
 
