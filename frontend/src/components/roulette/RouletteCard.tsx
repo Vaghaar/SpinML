@@ -42,7 +42,7 @@ export function RouletteCard({ roulette, index }: RouletteCardProps) {
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: index * 0.05 }}
       onClick={() => router.push(`/roulette/${roulette.id}`)}
-      className="glass rounded-2xl p-4 cursor-pointer hover:ring-1 hover:ring-primary-500/40 transition-all group"
+      className="glass rounded-2xl p-4 cursor-pointer hover:ring-1 hover:ring-primary-500/40 transition-all"
     >
       <div className="flex items-start justify-between gap-2">
         <div className="flex-1 min-w-0">
@@ -59,16 +59,14 @@ export function RouletteCard({ roulette, index }: RouletteCardProps) {
           </div>
         </div>
 
-        <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-          <button
-            onClick={handleDelete}
-            disabled={deleteMutation.isPending}
-            className="text-slate-500 hover:text-red-400 transition-colors p-1"
-            aria-label="Supprimer"
-          >
-            🗑
-          </button>
-        </div>
+        <button
+          onClick={handleDelete}
+          disabled={deleteMutation.isPending}
+          className="text-slate-500 hover:text-red-400 active:text-red-400 transition-colors p-2 rounded-xl hover:bg-red-500/10 active:bg-red-500/10 shrink-0"
+          aria-label="Supprimer"
+        >
+          {deleteMutation.isPending ? '…' : '🗑'}
+        </button>
       </div>
 
       {/* Segment color preview */}

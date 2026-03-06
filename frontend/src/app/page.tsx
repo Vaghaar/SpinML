@@ -7,6 +7,7 @@ import { RouletteCanvas }      from '@/components/landing/RouletteCanvas';
 import { GoogleSignInButton }  from '@/components/landing/GoogleSignInButton';
 import { useAuthStore }        from '@/stores/authStore';
 import { authApi }             from '@/lib/api';
+import { toast }               from '@/components/ui/Toast';
 
 // Stats de présentation
 const STATS = [
@@ -33,7 +34,9 @@ export default function LandingPage() {
       const { data } = await authApi.guest();
       login(data.accessToken, data.user);
       router.replace('/dashboard');
-    } catch {
+    } catch (err) {
+      console.error('[guest] erreur:', err);
+      toast.error('Connexion impossible', 'Le serveur est inaccessible. Vérifiez que le backend est démarré.');
       setGuestLoading(false);
     }
   };

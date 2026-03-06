@@ -60,38 +60,42 @@ public class VoteService {
                     .orElseThrow(() -> AppException.of(ErrorCode.ROULETTE_NOT_FOUND));
         }
 
+        boolean hasPredefinedOptions = req.options() != null && req.options().size() >= 2;
+        VoteStatus initialStatus = hasPredefinedOptions ? VoteStatus.ACTIVE : VoteStatus.PENDING;
+
         VoteSession session = voteSessionRepository.save(
                 VoteSession.builder()
                         .group(group)
                         .roulette(roulette)
                         .mode(req.mode())
-                        .status(VoteStatus.ACTIVE)
+                        .status(initialStatus)
                         .quorumPercent(req.quorumPercent())
                         .timeoutAt(req.timeoutAt())
                         .build()
         );
 
-        // Créer les options
-        List<VoteOption> options = new ArrayList<>();
-        for (var optReq : req.options()) {
-            Segment segment = null;
-            if (optReq.segmentId() != null) {
-                // Lier à un segment existant si fourni
-                segment = roulette != null
-                        ? roulette.getSegments().stream()
-                              .filter(s -> s.getId().equals(optReq.segmentId()))
-                              .findFirst().orElse(null)
-                        : null;
+        // Créer les options si fournies
+        if (hasPredefinedOptions) {
+            List<VoteOption> options = new ArrayList<>();
+            for (var optReq : req.options()) {
+                Segment segment = null;
+                if (optReq.segmentId() != null) {
+                    segment = roulette != null
+                            ? roulette.getSegments().stream()
+                                  .filter(s -> s.getId().equals(optReq.segmentId()))
+                                  .findFirst().orElse(null)
+                            : null;
+                }
+                options.add(voteOptionRepository.save(
+                        VoteOption.builder()
+                                .session(session)
+                                .label(optReq.label())
+                                .segment(segment)
+                                .build()
+                ));
             }
-            options.add(voteOptionRepository.save(
-                    VoteOption.builder()
-                            .session(session)
-                            .label(optReq.label())
-                            .segment(segment)
-                            .build()
-            ));
+            session.getOptions().addAll(options);
         }
-        session.getOptions().addAll(options);
 
         return toSessionResponse(session);
     }
@@ -146,6 +150,60 @@ public class VoteService {
         VoteSession session = findActiveSession(sessionId);
         requireAdmin(session.getGroup().getId(), requester.getId());
         return closeAndAnnounceWinner(session);
+    }
+
+    // ─── Ajout de proposition (phase PENDING) ────────────────────────────────
+
+    @Transactional
+    public VoteSessionResponse addProposal(UUID sessionId, String label, User user) {
+        VoteSession session = voteSessionRepository.findByIdWithOptions(sessionId)
+                .orElseThrow(() -> AppException.of(ErrorCode.VOTE_SESSION_NOT_FOUND));
+        if (session.getStatus() != VoteStatus.PENDING) {
+            throw AppException.of(ErrorCode.VOTE_NOT_PENDING);
+        }
+        requireMember(session.getGroup().getId(), user.getId());
+
+        VoteOption option = voteOptionRepository.save(VoteOption.builder()
+                .session(session)
+                .label(label.trim())
+                .build());
+        session.getOptions().add(option);
+
+        notificationService.broadcastVoteUpdate(session, null);
+        return toSessionResponse(session);
+    }
+
+    // ─── Démarrage du vote (PENDING → ACTIVE) ────────────────────────────────
+
+    @Transactional
+    public VoteSessionResponse startVote(UUID sessionId, User user) {
+        VoteSession session = voteSessionRepository.findByIdWithOptions(sessionId)
+                .orElseThrow(() -> AppException.of(ErrorCode.VOTE_SESSION_NOT_FOUND));
+        if (session.getStatus() != VoteStatus.PENDING) {
+            throw AppException.of(ErrorCode.VOTE_NOT_PENDING);
+        }
+        requireAdmin(session.getGroup().getId(), user.getId());
+        if (session.getOptions().size() < 2) {
+            throw AppException.of(ErrorCode.NOT_ENOUGH_PROPOSALS);
+        }
+
+        session.setStatus(VoteStatus.ACTIVE);
+        voteSessionRepository.save(session);
+        notificationService.broadcastVoteUpdate(session, null);
+
+        log.info("Vote démarré pour session {} ({} propositions)", sessionId, session.getOptions().size());
+        return toSessionResponse(session);
+    }
+
+    // ─── Sessions par groupe ──────────────────────────────────────────────────
+
+    @Transactional(readOnly = true)
+    public List<VoteSessionResponse> getByGroup(UUID groupId, User requester) {
+        requireMember(groupId, requester.getId());
+        return voteSessionRepository.findByGroupIdAllStatusesWithOptions(groupId)
+                .stream()
+                .map(this::toSessionResponse)
+                .toList();
     }
 
     // ─── Tâche planifiée : auto-close des sessions expirées ──────────────────

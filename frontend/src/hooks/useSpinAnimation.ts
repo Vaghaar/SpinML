@@ -103,10 +103,12 @@ export function useSpinAnimation(): UseSpinAnimationReturn {
   const startSpin = useCallback((serverAngleDeg: number) => {
     if (phaseRef.current !== 'idle' && phaseRef.current !== 'result') return;
 
-    const baseAngle    = currentAngle % 360;
-    // Total angle the wheel must travel = extra full rotations + the server target
-    const totalTravel  = FULL_ROTATIONS_EXTRA * 360 + serverAngleDeg;
-    const finalAngle   = baseAngle + totalTravel;
+    const baseAngle      = currentAngle % 360;
+    const visualTarget   = serverAngleDeg % 360;
+    const delta          = ((visualTarget - baseAngle) % 360 + 360) % 360 || 360;
+    const extraRotations = Math.floor(serverAngleDeg / 360);
+    const totalTravel    = (FULL_ROTATIONS_EXTRA + extraRotations) * 360 + delta;
+    const finalAngle     = baseAngle + totalTravel;
 
     setTargetAngle(finalAngle);
     lastTickRef.current = baseAngle;

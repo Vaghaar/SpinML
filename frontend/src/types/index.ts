@@ -89,12 +89,12 @@ export interface Group {
 }
 
 export interface GroupMember {
-  id:       string;
-  userId:   string;
-  name:     string;
-  picture?: string;
-  role:     GroupRole;
-  joinedAt: string;
+  id:          string;
+  userId:      string;
+  name:        string;
+  pictureUrl?: string;
+  role:        GroupRole;
+  joinedAt:    string;
 }
 
 // ─── Votes ────────────────────────────────────────────────────────────────────
@@ -144,6 +144,18 @@ export interface LiveVoteUpdate {
     tiebreakerServerAngle?: number;
   } | null;
   updatedAt: string;
+}
+
+// ─── Stats ────────────────────────────────────────────────────────────────────
+
+export interface PlaceCount {
+  label: string;
+  count: number;
+}
+
+export interface StatsResponse {
+  topPlaces:  PlaceCount[];
+  totalSpins: number;
 }
 
 export interface SpinSyncMessage {

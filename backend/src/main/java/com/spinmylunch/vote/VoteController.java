@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.net.URI;
+import java.util.List;
 import java.util.UUID;
 
 @RestController
@@ -19,6 +20,18 @@ import java.util.UUID;
 public class VoteController {
 
     private final VoteService voteService;
+
+    /**
+     * GET /api/v1/votes/sessions?groupId=
+     * Liste toutes les sessions de vote d'un groupe (tous statuts).
+     */
+    @GetMapping("/sessions")
+    public ResponseEntity<List<VoteSessionResponse>> getByGroup(
+            @RequestParam UUID groupId,
+            @CurrentUser User user
+    ) {
+        return ResponseEntity.ok(voteService.getByGroup(groupId, user));
+    }
 
     /**
      * POST /api/v1/votes/sessions
@@ -58,6 +71,31 @@ public class VoteController {
             @CurrentUser User user
     ) {
         return ResponseEntity.ok(voteService.getResults(id, user));
+    }
+
+    /**
+     * POST /api/v1/votes/sessions/:id/propose
+     * Ajoute une proposition à une session en phase PENDING.
+     */
+    @PostMapping("/sessions/{id}/propose")
+    public ResponseEntity<VoteSessionResponse> propose(
+            @PathVariable UUID id,
+            @Valid @RequestBody ProposeRequest request,
+            @CurrentUser User user
+    ) {
+        return ResponseEntity.ok(voteService.addProposal(id, request.label(), user));
+    }
+
+    /**
+     * POST /api/v1/votes/sessions/:id/start
+     * Démarre le vote (PENDING → ACTIVE). Admin uniquement.
+     */
+    @PostMapping("/sessions/{id}/start")
+    public ResponseEntity<VoteSessionResponse> startVote(
+            @PathVariable UUID id,
+            @CurrentUser User user
+    ) {
+        return ResponseEntity.ok(voteService.startVote(id, user));
     }
 
     /**

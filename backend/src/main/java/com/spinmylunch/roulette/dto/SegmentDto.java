@@ -16,7 +16,6 @@ public record SegmentDto(
         @DecimalMax(value = "9999.9999", message = "Le poids est trop élevé")
         BigDecimal weight,
 
-        @NotBlank(message = "La couleur est requise")
         @Pattern(regexp = "^#[0-9A-Fa-f]{6}$", message = "Format couleur invalide (#RRGGBB)")
         String color,
 

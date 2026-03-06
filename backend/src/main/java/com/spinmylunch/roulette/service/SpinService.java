@@ -60,7 +60,7 @@ public class SpinService {
         Segment winner   = weightedSelect(segments, weights);
         double   angle   = computeServerAngle(segments, winner, weights);
 
-        log.debug("Spin → gagnant='{}' angle={:.2f}°", winner.getLabel(), angle);
+        log.debug("Spin → gagnant='{}' angle={}°", winner.getLabel(), angle);
 
         return new SpinResult(
                 winner,
@@ -164,7 +164,7 @@ public class SpinService {
         // Rotations complètes aléatoires entre MIN et MAX
         int rotations = MIN_ROTATIONS + secureRandom.nextInt(MAX_ROTATIONS - MIN_ROTATIONS);
 
-        return rotations * 360.0 + targetDeg;
+        return rotations * 360.0 + (360.0 - targetDeg);
     }
 
     // ─── Utilitaires ─────────────────────────────────────────────────────────

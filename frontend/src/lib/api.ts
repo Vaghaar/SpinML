@@ -138,13 +138,21 @@ export const rouletteApi = {
 // ─── Endpoints Votes ──────────────────────────────────────────────────────────
 
 export const voteApi = {
+  getByGroup:    (groupId: string) => api.get('/votes/sessions', { params: { groupId } }),
   createSession: (data: unknown) => api.post('/votes/sessions', data),
   castVote:      (id: string, data: unknown) => api.post(`/votes/sessions/${id}/vote`, data),
   getResults:    (id: string) => api.get(`/votes/sessions/${id}/results`),
+  propose:       (id: string, label: string) => api.post(`/votes/sessions/${id}/propose`, { label }),
+  startVote:     (id: string) => api.post(`/votes/sessions/${id}/start`),
   closeSession:  (id: string) => api.post(`/votes/sessions/${id}/close`),
 };
 
 // ─── Endpoints Groupes ────────────────────────────────────────────────────────
+
+export const statsApi = {
+  myStats:    () => api.get('/stats/me'),
+  groupStats: (id: string) => api.get(`/stats/group/${id}`),
+};
 
 export const groupApi = {
   getMyGroups:   () => api.get('/groups'),

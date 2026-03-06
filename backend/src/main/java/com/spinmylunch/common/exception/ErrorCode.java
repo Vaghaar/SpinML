@@ -22,6 +22,8 @@ public enum ErrorCode {
     GROUP_FULL(HttpStatus.CONFLICT, "Le groupe a atteint sa capacité maximale (50 membres)"),
     ALREADY_MEMBER(HttpStatus.CONFLICT, "Vous êtes déjà membre de ce groupe"),
     VOTE_CLOSED(HttpStatus.CONFLICT, "La session de vote est terminée"),
+    VOTE_NOT_PENDING(HttpStatus.CONFLICT, "La session n'est pas en phase de propositions"),
+    NOT_ENOUGH_PROPOSALS(HttpStatus.BAD_REQUEST, "Il faut au moins 2 propositions pour démarrer le vote"),
     ALREADY_VOTED(HttpStatus.CONFLICT, "Vous avez déjà voté pour cette option"),
     INVALID_INVITE_CODE(HttpStatus.BAD_REQUEST, "Code d'invitation invalide"),
     SPIN_RATE_LIMIT(HttpStatus.TOO_MANY_REQUESTS, "Trop de spins, réessayez dans une minute"),

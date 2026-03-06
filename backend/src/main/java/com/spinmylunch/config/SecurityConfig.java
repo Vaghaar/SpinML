@@ -74,6 +74,8 @@ public class SecurityConfig {
                         .requestMatchers("/actuator/**").hasRole("ADMIN")
                         // WebSocket
                         .requestMatchers("/ws/**").permitAll()
+                        // Stats
+                        .requestMatchers("/api/v1/stats/**").authenticated()
                         // Tout le reste nécessite une auth
                         .anyRequest().authenticated()
                 )

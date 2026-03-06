@@ -16,9 +16,8 @@ public record CreateVoteSessionRequest(
 
         VoteMode mode,
 
-        @NotEmpty(message = "Au moins 2 options sont requises")
-        @Size(min = 2, max = 20)
-        List<VoteOptionRequest> options,
+        @Size(max = 20)
+        List<VoteOptionRequest> options,   // null = session PENDING (propositions collectives)
 
         @Min(1) @Max(100)
         Integer quorumPercent,
@@ -28,6 +27,7 @@ public record CreateVoteSessionRequest(
     public CreateVoteSessionRequest {
         if (mode == null)          mode = VoteMode.MAJORITY;
         if (quorumPercent == null) quorumPercent = 50;
+        if (options == null)       options = List.of();
     }
 
     public record VoteOptionRequest(

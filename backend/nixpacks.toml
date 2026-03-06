@@ -1,0 +1,8 @@
+[phases.setup]
+nixPkgs = ["jdk21_headless", "maven"]
+
+[phases.build]
+cmds = ["mvn package -DskipTests -q"]
+
+[start]
+cmd = "java -jar target/spinmylunch-backend-0.1.0-SNAPSHOT.jar"

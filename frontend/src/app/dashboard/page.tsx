@@ -9,6 +9,7 @@ import { useAuth }                from '@/hooks/useAuth';
 import { useGroupSocket }         from '@/hooks/useGroupSocket';
 import { RouletteCard }           from '@/components/roulette/RouletteCard';
 import { CreateRouletteModal }    from '@/components/roulette/CreateRouletteModal';
+import { CreateGroupModal }       from '@/components/group/CreateGroupModal';
 import { VoteSessionCard }        from '@/components/vote/VoteSessionCard';
 import { toast }                  from '@/components/ui/Toast';
 import type { Roulette, Group, LiveVoteUpdate } from '@/types';
@@ -41,12 +42,13 @@ export default function DashboardPage() {
   const router = useRouter();
   const { user, isAuthenticated, isLoading: authLoading, logout } = useAuth();
 
-  const [showCreate, setShowCreate]       = useState(false);
-  const [activeGroupId, setActiveGroupId] = useState<string | null>(null);
-  const [liveUpdates, setLiveUpdates]     = useState<Record<string, LiveVoteUpdate>>({});
-  const [joinCode, setJoinCode]           = useState('');
-  const [showJoin, setShowJoin]           = useState(false);
-  const [joiningGroup, setJoiningGroup]   = useState(false);
+  const [showCreate, setShowCreate]           = useState(false);
+  const [showCreateGroup, setShowCreateGroup] = useState(false);
+  const [activeGroupId, setActiveGroupId]     = useState<string | null>(null);
+  const [liveUpdates, setLiveUpdates]         = useState<Record<string, LiveVoteUpdate>>({});
+  const [joinCode, setJoinCode]               = useState('');
+  const [showJoin, setShowJoin]               = useState(false);
+  const [joiningGroup, setJoiningGroup]       = useState(false);
 
   useEffect(() => {
     if (!authLoading && !isAuthenticated) router.replace('/');
@@ -179,10 +181,16 @@ export default function DashboardPage() {
         <section>
           <div className="flex items-center justify-between mb-3">
             <h2 className="font-title font-bold text-white">Groupes</h2>
-            <button onClick={() => setShowJoin(s => !s)}
-              className="text-sm bg-accent-500/20 hover:bg-accent-500/30 text-accent-400 px-3 py-1.5 rounded-xl transition-colors font-semibold">
-              Rejoindre
-            </button>
+            <div className="flex items-center gap-2">
+              <button onClick={() => setShowCreateGroup(true)}
+                className="text-sm bg-primary-500/20 hover:bg-primary-500/30 text-primary-400 px-3 py-1.5 rounded-xl transition-colors font-semibold">
+                + Créer
+              </button>
+              <button onClick={() => setShowJoin(s => !s)}
+                className="text-sm bg-accent-500/20 hover:bg-accent-500/30 text-accent-400 px-3 py-1.5 rounded-xl transition-colors font-semibold">
+                Rejoindre
+              </button>
+            </div>
           </div>
 
           {showJoin && (
@@ -205,7 +213,7 @@ export default function DashboardPage() {
 
           {groups.length === 0 ? (
             <div className="glass rounded-2xl p-6 text-center">
-              <p className="text-slate-500 text-sm">Rejoignez un groupe avec un code d'invitation</p>
+              <p className="text-slate-500 text-sm">Créez un groupe ou rejoignez-en un avec un code d'invitation</p>
             </div>
           ) : (
             <div className="flex flex-col gap-2">
@@ -246,6 +254,7 @@ export default function DashboardPage() {
       </div>
 
       <CreateRouletteModal open={showCreate} onClose={() => setShowCreate(false)} />
+      <CreateGroupModal open={showCreateGroup} onClose={() => setShowCreateGroup(false)} />
 
       {/* Footer */}
       <footer className="max-w-2xl mx-auto px-4 mt-4 text-center">
@@ -263,6 +272,7 @@ export default function DashboardPage() {
 function GroupRow({ group, index, isActive, onSelect }: {
   group: Group; index: number; isActive: boolean; onSelect: () => void;
 }) {
+  const router = useRouter();
   const [copied, setCopied] = useState(false);
 
   return (
@@ -291,6 +301,12 @@ function GroupRow({ group, index, isActive, onSelect }: {
             className="text-xs text-slate-400 hover:text-white transition-colors px-2 py-1 rounded-lg bg-white/5"
           >
             {copied ? '✓ Copié' : '📋 Code'}
+          </button>
+          <button
+            onClick={e => { e.stopPropagation(); router.push(`/groups/${group.id}`); }}
+            className="text-xs text-slate-400 hover:text-white transition-colors px-2 py-1 rounded-lg bg-white/5"
+          >
+            Ouvrir →
           </button>
         </div>
       </div>
