@@ -6,21 +6,23 @@ import { motion, AnimatePresence }          from 'framer-motion';
 import { useQuery, useMutation }            from '@tanstack/react-query';
 import { rouletteApi }                      from '@/lib/api';
 import { useAuth }                          from '@/hooks/useAuth';
+import { useGroupSocket }                   from '@/hooks/useGroupSocket';
 import { useSpinAnimation }                 from '@/hooks/useSpinAnimation';
 import { RouletteWheel }                    from '@/components/roulette/RouletteWheel';
 import { SpinButton }                       from '@/components/roulette/SpinButton';
 import { SpinResultCard }                   from '@/components/roulette/SpinResultCard';
 import { toast }                            from '@/components/ui/Toast';
-import type { Roulette, SpinResponse, Segment } from '@/types';
+import type { Roulette, SpinResponse, Segment, SpinSyncMessage } from '@/types';
 
 export default function RoulettePage() {
   const { id }    = useParams<{ id: string }>();
   const router    = useRouter();
   const { isAuthenticated, isLoading: authLoading } = useAuth();
 
-  const [winner, setWinner]           = useState<Segment | null>(null);
-  const [showResult, setShowResult]   = useState(false);
+  const [winner, setWinner]             = useState<Segment | null>(null);
+  const [showResult, setShowResult]     = useState(false);
   const [lastSpinResp, setLastSpinResp] = useState<SpinResponse | null>(null);
+  const [spinnerName, setSpinnerName]   = useState<string | null>(null);
 
   const {
     phase,
@@ -29,6 +31,35 @@ export default function RoulettePage() {
     startSpin,
     reset,
   } = useSpinAnimation();
+
+  // Spin synchronisé — quand un autre membre du groupe spinner
+  const { user } = useAuth();
+  const handleSpinSync = useCallback((msg: SpinSyncMessage) => {
+    if (msg.rouletteId !== id) return;         // pas cette roulette
+    if (msg.spunBy === user?.id) return;       // c'est notre propre spin, déjà géré
+    if (isSpinning) return;                    // animation déjà en cours
+
+    setSpinnerName(msg.spunByName);
+    setShowResult(false);
+    setWinner(null);
+    // Convertir le SpinSyncMessage en SpinResponse partiel pour réutiliser la logique
+    setLastSpinResp({
+      spinResultId:     msg.spinResultId,
+      winningSegmentId: msg.winningSegmentId,
+      winningLabel:     msg.winningLabel,
+      winningColor:     msg.winningColor,
+      serverAngle:      msg.serverAngle,
+      xpEarned:         0,
+      badgeUnlocked:    null,
+      spunAt:           msg.spunAt,
+    } as SpinResponse);
+    startSpin(msg.serverAngle);
+  }, [id, user?.id, isSpinning, startSpin]);
+
+  useGroupSocket({
+    groupId: roulette?.groupId ?? null,
+    onSpinSync: handleSpinSync,
+  });
 
   // ── Fetch roulette ──────────────────────────────────────────────────────────
   const { data: roulette, isLoading: rouletteLoading } = useQuery<Roulette>({
@@ -70,14 +101,19 @@ export default function RoulettePage() {
       if (lastSpinResp.xpEarned > 0) {
         toast.xp(lastSpinResp.xpEarned, lastSpinResp.badgeUnlocked?.name);
       }
+      if (spinnerName) {
+        toast.success(`${spinnerName} a spinné !`);
+        setSpinnerName(null);
+      }
     }
-  }, [phase, lastSpinResp, roulette]);
+  }, [phase, lastSpinResp, roulette, spinnerName]);
 
   const handleSpin = useCallback(() => {
     if (isSpinning) return;
     if (!isAuthenticated) { router.push('/'); return; }
     setShowResult(false);
     setWinner(null);
+    setSpinnerName(null);
     spinMutation.mutate();
   }, [isSpinning, isAuthenticated, router, spinMutation]);
 
@@ -154,6 +190,7 @@ export default function RoulettePage() {
           visible={showResult}
           winner={winner}
           onDismiss={handleDismiss}
+          spinnerName={spinnerName ?? undefined}
         />
       </motion.div>
 

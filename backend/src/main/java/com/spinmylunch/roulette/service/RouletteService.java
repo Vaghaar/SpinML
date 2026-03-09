@@ -124,6 +124,7 @@ public class RouletteService {
         );
         roulette.getSegments().add(segment);
 
+        notificationService.broadcastRouletteUpdate(roulette, "PROPOSAL_ADDED");
         return toResponse(roulette);
     }
 
@@ -160,6 +161,7 @@ public class RouletteService {
             roulette.getSegments().get(i).setPosition(i);
         }
 
+        notificationService.broadcastRouletteUpdate(roulette, "PROPOSAL_REMOVED");
         return toResponse(roulette);
     }
 
@@ -185,6 +187,7 @@ public class RouletteService {
         roulette.setStatus(RouletteStatus.ACTIVE);
         rouletteRepository.save(roulette);
 
+        notificationService.broadcastRouletteUpdate(roulette, "STARTED");
         return toResponse(roulette);
     }
 

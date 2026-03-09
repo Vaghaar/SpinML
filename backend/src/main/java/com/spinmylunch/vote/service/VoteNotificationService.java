@@ -1,7 +1,9 @@
 package com.spinmylunch.vote.service;
 
 import com.spinmylunch.domain.group.GroupMemberRepository;
+import com.spinmylunch.domain.roulette.Roulette;
 import com.spinmylunch.domain.vote.*;
+import com.spinmylunch.roulette.dto.RouletteUpdateMessage;
 import com.spinmylunch.vote.dto.LiveVoteUpdate;
 import com.spinmylunch.vote.dto.SpinSyncMessage;
 import lombok.RequiredArgsConstructor;
@@ -34,6 +36,10 @@ public class VoteNotificationService {
 
     private static String spinTopic(UUID groupId) {
         return "/topic/group/" + groupId + "/spin";
+    }
+
+    private static String rouletteTopic(UUID groupId) {
+        return "/topic/group/" + groupId + "/roulette";
     }
 
     // ─── Vote live update ─────────────────────────────────────────────────────
@@ -70,6 +76,38 @@ public class VoteNotificationService {
     }
 
     // ─── Spin sync ────────────────────────────────────────────────────────────
+
+    /**
+     * Diffuse une mise à jour de roulette (proposition, retrait, démarrage).
+     */
+    public void broadcastRouletteUpdate(Roulette roulette, String event) {
+        if (roulette.getGroup() == null) return;
+        UUID groupId = roulette.getGroup().getId();
+
+        List<RouletteUpdateMessage.SegmentInfo> segInfos = roulette.getSegments().stream()
+                .map(s -> new RouletteUpdateMessage.SegmentInfo(
+                        s.getId(),
+                        s.getLabel(),
+                        s.getColor(),
+                        s.getPosition(),
+                        s.getProposedBy() != null ? s.getProposedBy().getId() : null,
+                        s.getProposedBy() != null ? s.getProposedBy().getName() : null
+                ))
+                .toList();
+
+        RouletteUpdateMessage msg = new RouletteUpdateMessage(
+                roulette.getId(),
+                groupId,
+                event,
+                roulette.getName(),
+                roulette.getStatus().name(),
+                segInfos,
+                Instant.now()
+        );
+
+        messagingTemplate.convertAndSend(rouletteTopic(groupId), msg);
+        log.debug("Roulette update broadcasté → {} (event={})", rouletteTopic(groupId), event);
+    }
 
     /**
      * Diffuse le résultat d'un spin à tous les membres du groupe.

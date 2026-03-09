@@ -13,7 +13,7 @@ import { CreateVoteSessionModal }           from '@/components/vote/CreateVoteSe
 import { CreateRouletteModal }              from '@/components/roulette/CreateRouletteModal';
 import { GroupRouletteCard }               from '@/components/roulette/GroupRouletteCard';
 import { TopFoodsChart }                    from '@/components/charts/TopFoodsChart';
-import type { GroupMember, VoteSession, LiveVoteUpdate, StatsResponse, Roulette } from '@/types';
+import type { GroupMember, VoteSession, LiveVoteUpdate, StatsResponse, Roulette, RouletteUpdateMessage, SpinSyncMessage } from '@/types';
 
 // ─── Tabs ─────────────────────────────────────────────────────────────────────
 
@@ -78,7 +78,23 @@ export default function GroupPage() {
     refetchSessions();
   }, [refetchSessions]);
 
-  useGroupSocket({ groupId: id, onVoteUpdate: handleVoteUpdate });
+  const handleRouletteUpdate = useCallback((msg: RouletteUpdateMessage) => {
+    queryClient.invalidateQueries({ queryKey: ['group-roulettes', id] });
+    if (msg.event === 'STARTED') {
+      toast.success(`"${msg.rouletteName}" est prête à spinner !`);
+    }
+  }, [queryClient, id]);
+
+  const handleSpinSync = useCallback((msg: SpinSyncMessage) => {
+    toast.success(`${msg.spunByName} a spinné : ${msg.winningLabel} 🎡`);
+  }, []);
+
+  useGroupSocket({
+    groupId: id,
+    onVoteUpdate:     handleVoteUpdate,
+    onRouletteUpdate: handleRouletteUpdate,
+    onSpinSync:       handleSpinSync,
+  });
 
   // ─── QR code ──────────────────────────────────────────────────────────────
 

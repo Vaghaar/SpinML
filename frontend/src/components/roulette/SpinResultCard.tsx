@@ -6,12 +6,13 @@ import confetti from 'canvas-confetti';
 import type { Segment } from '@/types';
 
 interface SpinResultCardProps {
-  visible: boolean;
-  winner: Segment | null;
-  onDismiss: () => void;
+  visible:      boolean;
+  winner:       Segment | null;
+  onDismiss:    () => void;
+  spinnerName?: string;  // Nom du membre qui a spinné (si ce n'est pas l'utilisateur courant)
 }
 
-export function SpinResultCard({ visible, winner, onDismiss }: SpinResultCardProps) {
+export function SpinResultCard({ visible, winner, onDismiss, spinnerName }: SpinResultCardProps) {
   const confettiFired = useRef(false);
 
   useEffect(() => {
@@ -53,7 +54,7 @@ export function SpinResultCard({ visible, winner, onDismiss }: SpinResultCardPro
             </motion.div>
 
             <p className="font-body text-slate-400 text-sm mb-2 uppercase tracking-widest">
-              Le destin a parlé !
+              {spinnerName ? `${spinnerName} a spinné !` : 'Le destin a parlé !'}
             </p>
 
             <motion.h2

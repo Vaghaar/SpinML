@@ -173,3 +173,20 @@ export interface SpinSyncMessage {
   spunByName:       string;
   spunAt:           string;
 }
+
+export interface RouletteUpdateMessage {
+  rouletteId:   string;
+  groupId:      string;
+  event:        'PROPOSAL_ADDED' | 'PROPOSAL_REMOVED' | 'STARTED';
+  rouletteName: string;
+  status:       RouletteStatus;
+  segments: {
+    id:              string;
+    label:           string;
+    color:           string;
+    position:        number;
+    proposedById?:   string;
+    proposedByName?: string;
+  }[];
+  updatedAt: string;
+}

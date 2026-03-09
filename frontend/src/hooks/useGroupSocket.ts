@@ -4,17 +4,18 @@ import { useEffect, useRef, useCallback } from 'react';
 import { Client, type IMessage } from '@stomp/stompjs';
 import SockJS from 'sockjs-client';
 import { useAuthStore } from '@/stores/authStore';
-import type { LiveVoteUpdate, SpinSyncMessage } from '@/types';
+import type { LiveVoteUpdate, SpinSyncMessage, RouletteUpdateMessage } from '@/types';
 
 const BASE_URL = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:8080';
 
 interface UseGroupSocketOptions {
   groupId: string | null;
-  onVoteUpdate?:   (update: LiveVoteUpdate)   => void;
-  onSpinSync?:     (msg: SpinSyncMessage)     => void;
+  onVoteUpdate?:     (update: LiveVoteUpdate)          => void;
+  onSpinSync?:       (msg: SpinSyncMessage)            => void;
+  onRouletteUpdate?: (msg: RouletteUpdateMessage)      => void;
 }
 
-export function useGroupSocket({ groupId, onVoteUpdate, onSpinSync }: UseGroupSocketOptions) {
+export function useGroupSocket({ groupId, onVoteUpdate, onSpinSync, onRouletteUpdate }: UseGroupSocketOptions) {
   const clientRef    = useRef<Client | null>(null);
   const connectedRef = useRef(false);
   const accessToken  = useAuthStore((s) => s.accessToken);
@@ -52,6 +53,14 @@ export function useGroupSocket({ groupId, onVoteUpdate, onSpinSync }: UseGroupSo
           try {
             const data: SpinSyncMessage = JSON.parse(msg.body);
             onSpinSync?.(data);
+          } catch { /* ignore malformed */ }
+        });
+
+        // Subscribe roulette updates (propositions, démarrage)
+        client.subscribe(`/topic/group/${groupId}/roulette`, (msg: IMessage) => {
+          try {
+            const data: RouletteUpdateMessage = JSON.parse(msg.body);
+            onRouletteUpdate?.(data);
           } catch { /* ignore malformed */ }
         });
       },
