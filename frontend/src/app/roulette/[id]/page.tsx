@@ -35,41 +35,6 @@ export default function RoulettePage() {
     reset,
   } = useSpinAnimation();
 
-  // Spin synchronisé — quand un spin arrive via WebSocket (autre device ou autre membre)
-  const handleSpinSync = useCallback((msg: SpinSyncMessage) => {
-    if (msg.rouletteId !== id) return;   // pas cette roulette
-
-    // Si ce device a initié le spin, l'animation est déjà en cours via onSuccess
-    // → ignorer ce message mais réinitialiser le flag pour le prochain spin
-    if (spinInitiatedByMe.current) {
-      spinInitiatedByMe.current = false;
-      return;
-    }
-
-    if (isSpinning) return;              // animation déjà en cours
-
-    setSpinnerName(msg.spunByName);
-    setShowResult(false);
-    setWinner(null);
-    // Convertir le SpinSyncMessage en SpinResponse partiel pour réutiliser la logique
-    setLastSpinResp({
-      spinResultId:     msg.spinResultId,
-      winningSegmentId: msg.winningSegmentId,
-      winningLabel:     msg.winningLabel,
-      winningColor:     msg.winningColor,
-      serverAngle:      msg.serverAngle,
-      xpEarned:         0,
-      badgeUnlocked:    null,
-      spunAt:           msg.spunAt,
-    } as SpinResponse);
-    startSpin(msg.serverAngle);
-  }, [id, user?.id, isSpinning, startSpin]);
-
-  useGroupSocket({
-    groupId: roulette?.groupId ?? null,
-    onSpinSync: handleSpinSync,
-  });
-
   // ── Fetch roulette ──────────────────────────────────────────────────────────
   const { data: roulette, isLoading: rouletteLoading } = useQuery<Roulette>({
     queryKey: ['roulette', id],
@@ -89,9 +54,42 @@ export default function RoulettePage() {
 
   const isCreator    = roulette?.creatorId === user?.id;
   const isGroupAdmin = members.some(m => m.userId === user?.id && m.role === 'ADMIN');
-  // Pour une roulette personnelle, seul le créateur y a accès de toute façon
-  // Pour une roulette de groupe, seul le créateur ou un admin peut lancer le spin
-  const canSpin = roulette?.groupId ? (isCreator || isGroupAdmin) : true;
+  const canSpin      = roulette?.groupId ? (isCreator || isGroupAdmin) : true;
+
+  // ── Spin synchronisé — reçu via WebSocket depuis les autres appareils ────────
+  // IMPORTANT : doit être déclaré APRÈS useQuery(roulette) pour que roulette soit défini
+  const handleSpinSync = useCallback((msg: SpinSyncMessage) => {
+    if (msg.rouletteId !== id) return;   // pas cette roulette
+
+    // Si CE device a initié le spin, l'animation est déjà lancée via onSuccess → ignorer
+    if (spinInitiatedByMe.current) {
+      spinInitiatedByMe.current = false;
+      return;
+    }
+
+    if (isSpinning) return;              // animation déjà en cours
+
+    setSpinnerName(msg.spunByName);
+    setShowResult(false);
+    setWinner(null);
+    setLastSpinResp({
+      spinResultId:     msg.spinResultId,
+      winningSegmentId: msg.winningSegmentId,
+      winningLabel:     msg.winningLabel,
+      winningColor:     msg.winningColor,
+      serverAngle:      msg.serverAngle,
+      xpEarned:         0,
+      badgeUnlocked:    null,
+      spunAt:           msg.spunAt,
+    } as SpinResponse);
+    startSpin(msg.serverAngle);
+  }, [id, isSpinning, startSpin]);
+
+  // groupId disponible maintenant que roulette est déclaré
+  useGroupSocket({
+    groupId: roulette?.groupId ?? null,
+    onSpinSync: handleSpinSync,
+  });
 
   // ── Spin mutation ───────────────────────────────────────────────────────────
   const spinMutation = useMutation<SpinResponse>({
