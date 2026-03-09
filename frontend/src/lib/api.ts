@@ -164,6 +164,7 @@ export const groupApi = {
   getById:       (id: string)    => api.get(`/groups/${id}`),
   join:          (inviteCode: string) => api.post('/groups/join', { inviteCode }),
   getMembers:    (id: string)    => api.get(`/groups/${id}/members`),
+  delete:        (id: string)    => api.delete(`/groups/${id}`),
   removeMember:  (groupId: string, userId: string) =>
     api.delete(`/groups/${groupId}/members/${userId}`),
 };

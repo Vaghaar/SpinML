@@ -108,6 +108,18 @@ public class GroupService {
                 .toList();
     }
 
+    // ─── Supprimer le groupe ─────────────────────────────────────────────────
+
+    @Transactional
+    public void delete(UUID id, User requester) {
+        Group group = groupRepository.findById(id)
+                .orElseThrow(() -> AppException.of(ErrorCode.GROUP_NOT_FOUND));
+        if (!group.getAdmin().getId().equals(requester.getId())) {
+            throw AppException.of(ErrorCode.FORBIDDEN, "Seul l'admin peut supprimer le groupe");
+        }
+        groupRepository.delete(group);
+    }
+
     // ─── Quitter / Exclure ───────────────────────────────────────────────────
 
     @Transactional

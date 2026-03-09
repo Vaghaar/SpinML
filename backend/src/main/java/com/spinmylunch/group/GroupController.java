@@ -64,6 +64,13 @@ public class GroupController {
         return ResponseEntity.ok(groupService.getMembers(id, user));
     }
 
+    /** DELETE /api/v1/groups/:id — admin uniquement */
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> delete(@PathVariable UUID id, @CurrentUser User user) {
+        groupService.delete(id, user);
+        return ResponseEntity.noContent().build();
+    }
+
     /** DELETE /api/v1/groups/:groupId/members/:userId */
     @DeleteMapping("/{groupId}/members/{userId}")
     public ResponseEntity<Void> removeMember(

@@ -3,9 +3,10 @@
 import { useState, useCallback, useEffect } from 'react';
 import { useParams, useRouter }             from 'next/navigation';
 import { motion }                           from 'framer-motion';
-import { useQuery, useQueryClient }         from '@tanstack/react-query';
+import { useQuery, useQueryClient, useMutation } from '@tanstack/react-query';
 import QRCode                               from 'qrcode';
 import { groupApi, voteApi, statsApi, rouletteApi } from '@/lib/api';
+import { toast } from '@/components/ui/Toast';
 import { useAuth }                          from '@/hooks/useAuth';
 import { useGroupSocket }                   from '@/hooks/useGroupSocket';
 import { VoteSessionCard }                  from '@/components/vote/VoteSessionCard';
@@ -72,6 +73,22 @@ export default function GroupPage() {
   });
 
   // ─── WebSocket ────────────────────────────────────────────────────────────
+
+  const deleteGroupMutation = useMutation({
+    mutationFn: () => groupApi.delete(id),
+    onSuccess: () => {
+      toast.success('Groupe supprimé');
+      queryClient.invalidateQueries({ queryKey: ['my-groups'] });
+      router.replace('/dashboard');
+    },
+    onError: () => toast.error('Erreur', 'Impossible de supprimer le groupe.'),
+  });
+
+  const handleDeleteGroup = () => {
+    if (confirm(`Supprimer définitivement le groupe "${group?.name}" ?\n\nToutes les roulettes et les votes seront supprimés.`)) {
+      deleteGroupMutation.mutate();
+    }
+  };
 
   const handleVoteUpdate = useCallback((update: LiveVoteUpdate) => {
     setLiveUpdates(prev => ({ ...prev, [update.sessionId]: update }));
@@ -405,6 +422,17 @@ export default function GroupPage() {
             <p className="text-xs text-slate-500 uppercase tracking-wider">
               {members.length} membre{members.length !== 1 ? 's' : ''}
             </p>
+
+            {isAdmin && (
+              <button
+                onClick={handleDeleteGroup}
+                disabled={deleteGroupMutation.isPending}
+                className="flex items-center gap-2 text-sm text-red-400 hover:text-red-300 bg-red-500/10 hover:bg-red-500/15 border border-red-500/20 px-4 py-2.5 rounded-xl transition-colors disabled:opacity-40 self-start"
+              >
+                🗑 {deleteGroupMutation.isPending ? 'Suppression…' : 'Supprimer le groupe'}
+              </button>
+            )}
+
             {members.map((m, i) => (
               <motion.div key={m.id}
                 initial={{ opacity: 0, x: -8 }} animate={{ opacity: 1, x: 0 }}
