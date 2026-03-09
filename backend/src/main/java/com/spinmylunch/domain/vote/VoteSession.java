@@ -43,7 +43,7 @@ public class VoteSession {
 
     @Column(name = "quorum_percent", nullable = false)
     @Builder.Default
-    private int quorumPercent = 50;
+    private int quorumPercent = 100;
 
     @Column(name = "timeout_at")
     private Instant timeoutAt;

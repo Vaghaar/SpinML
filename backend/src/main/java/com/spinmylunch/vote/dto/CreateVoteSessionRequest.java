@@ -26,7 +26,7 @@ public record CreateVoteSessionRequest(
 ) {
     public CreateVoteSessionRequest {
         if (mode == null)          mode = VoteMode.MAJORITY;
-        if (quorumPercent == null) quorumPercent = 50;
+        if (quorumPercent == null) quorumPercent = 100;
         if (options == null)       options = List.of();
     }
 
