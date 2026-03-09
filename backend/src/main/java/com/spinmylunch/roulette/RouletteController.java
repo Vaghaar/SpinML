@@ -22,11 +22,16 @@ public class RouletteController {
     private final RouletteService rouletteService;
 
     /**
-     * GET /api/v1/roulettes
-     * Liste les roulettes de l'utilisateur courant.
+     * GET /api/v1/roulettes?groupId=
+     * Liste les roulettes de l'utilisateur courant, ou d'un groupe si groupId est fourni.
      */
     @GetMapping
-    public ResponseEntity<List<RouletteResponse>> getMyRoulettes(@CurrentUser User user) {
+    public ResponseEntity<List<RouletteResponse>> getRoulettes(
+            @RequestParam(required = false) UUID groupId,
+            @CurrentUser User user) {
+        if (groupId != null) {
+            return ResponseEntity.ok(rouletteService.getByGroup(groupId, user));
+        }
         return ResponseEntity.ok(rouletteService.getMyRoulettes(user));
     }
 

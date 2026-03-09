@@ -5,22 +5,25 @@ import { useParams, useRouter }             from 'next/navigation';
 import { motion }                           from 'framer-motion';
 import { useQuery, useQueryClient }         from '@tanstack/react-query';
 import QRCode                               from 'qrcode';
-import { groupApi, voteApi, statsApi }     from '@/lib/api';
+import { groupApi, voteApi, statsApi, rouletteApi } from '@/lib/api';
 import { useAuth }                          from '@/hooks/useAuth';
 import { useGroupSocket }                   from '@/hooks/useGroupSocket';
 import { VoteSessionCard }                  from '@/components/vote/VoteSessionCard';
 import { CreateVoteSessionModal }           from '@/components/vote/CreateVoteSessionModal';
+import { CreateRouletteModal }              from '@/components/roulette/CreateRouletteModal';
+import { RouletteCard }                     from '@/components/roulette/RouletteCard';
 import { TopFoodsChart }                    from '@/components/charts/TopFoodsChart';
-import type { GroupMember, VoteSession, LiveVoteUpdate, StatsResponse } from '@/types';
+import type { GroupMember, VoteSession, LiveVoteUpdate, StatsResponse, Roulette } from '@/types';
 
 // ─── Tabs ─────────────────────────────────────────────────────────────────────
 
-type Tab = 'votes' | 'stats' | 'membres';
+type Tab = 'votes' | 'roulettes' | 'stats' | 'membres';
 
 const TABS: { id: Tab; label: string; icon: string }[] = [
-  { id: 'votes',   label: 'Votes',   icon: '🗳️' },
-  { id: 'stats',   label: 'Stats',   icon: '📊' },
-  { id: 'membres', label: 'Membres', icon: '👥' },
+  { id: 'votes',     label: 'Votes',     icon: '🗳️' },
+  { id: 'roulettes', label: 'Roulettes', icon: '🎡' },
+  { id: 'stats',     label: 'Stats',     icon: '📊' },
+  { id: 'membres',   label: 'Membres',   icon: '👥' },
 ];
 
 export default function GroupPage() {
@@ -31,6 +34,7 @@ export default function GroupPage() {
 
   const [tab, setTab]                   = useState<Tab>('votes');
   const [showCreateVote, setShowCreate] = useState(false);
+  const [showCreateRoulette, setShowCreateRoulette] = useState(false);
   const [qrDataUrl, setQrDataUrl]       = useState('');
   const [copiedCode, setCopiedCode]     = useState(false);
   const [liveUpdates, setLiveUpdates]   = useState<Record<string, LiveVoteUpdate>>({});
@@ -53,6 +57,12 @@ export default function GroupPage() {
     queryKey: ['group-sessions', id],
     queryFn:  async () => { const { data } = await voteApi.getByGroup(id); return data; },
     enabled:  !!id && isAuthenticated,
+  });
+
+  const { data: roulettes = [] } = useQuery<Roulette[]>({
+    queryKey: ['group-roulettes', id],
+    queryFn:  async () => { const { data } = await rouletteApi.getByGroup(id); return data; },
+    enabled:  !!id && isAuthenticated && tab === 'roulettes',
   });
 
   const { data: stats } = useQuery<StatsResponse>({
@@ -276,6 +286,36 @@ export default function GroupPage() {
           </div>
         )}
 
+        {/* ── Onglet Roulettes ────────────────────────────────────────────── */}
+        {tab === 'roulettes' && (
+          <div className="flex flex-col gap-4">
+            <div className="flex items-center justify-between">
+              <h2 className="font-title font-bold text-white">Roulettes du groupe</h2>
+              <button onClick={() => setShowCreateRoulette(true)}
+                className="text-sm bg-primary-500/20 hover:bg-primary-500/30 text-primary-400 px-3 py-1.5 rounded-xl transition-colors font-semibold">
+                + Nouvelle roulette
+              </button>
+            </div>
+            {roulettes.length === 0 ? (
+              <div className="glass rounded-2xl p-10 text-center flex flex-col items-center gap-3">
+                <span className="text-5xl">🎡</span>
+                <p className="text-slate-300 font-semibold">Aucune roulette dans ce groupe</p>
+                <p className="text-slate-500 text-sm">Créez une roulette partagée pour choisir quoi manger.</p>
+                <button onClick={() => setShowCreateRoulette(true)}
+                  className="mt-2 px-5 py-2.5 rounded-xl bg-primary-500/20 hover:bg-primary-500/30 text-primary-400 font-bold text-sm transition-colors">
+                  Créer la première roulette
+                </button>
+              </div>
+            ) : (
+              <div className="flex flex-col gap-3">
+                {roulettes.map((r, i) => (
+                  <RouletteCard key={r.id} roulette={r} index={i} />
+                ))}
+              </div>
+            )}
+          </div>
+        )}
+
         {/* ── Onglet Stats ────────────────────────────────────────────────── */}
         {tab === 'stats' && (
           <div className="flex flex-col gap-4">
@@ -377,6 +417,11 @@ export default function GroupPage() {
         open={showCreateVote}
         onClose={() => setShowCreate(false)}
         onCreated={() => queryClient.invalidateQueries({ queryKey: ['group-sessions', id] })}
+      />
+      <CreateRouletteModal
+        groupId={id}
+        open={showCreateRoulette}
+        onClose={() => setShowCreateRoulette(false)}
       />
     </div>
   );

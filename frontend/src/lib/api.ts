@@ -126,6 +126,7 @@ export const profileApi = {
 
 export const rouletteApi = {
   getMyRoulettes: () => api.get('/roulettes'),
+  getByGroup: (groupId: string) => api.get('/roulettes', { params: { groupId } }),
   create:     (data: unknown) => api.post('/roulettes', data),
   getById:    (id: string)    => api.get(`/roulettes/${id}`),
   update:     (id: string, data: unknown) => api.put(`/roulettes/${id}`, data),

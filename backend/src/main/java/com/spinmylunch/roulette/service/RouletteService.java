@@ -85,6 +85,15 @@ public class RouletteService {
                 .stream().map(this::toResponse).toList();
     }
 
+    @Transactional(readOnly = true)
+    public List<RouletteResponse> getByGroup(UUID groupId, User user) {
+        groupRepository.findById(groupId)
+                .orElseThrow(() -> AppException.of(ErrorCode.GROUP_NOT_FOUND));
+        requireGroupMember(groupId, user.getId());
+        return rouletteRepository.findByGroupIdOrderByCreatedAtDesc(groupId)
+                .stream().map(this::toResponse).toList();
+    }
+
     // ─── Supprimer ────────────────────────────────────────────────────────────
 
     @Transactional

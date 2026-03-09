@@ -8,8 +8,9 @@ import { toast } from '@/components/ui/Toast';
 import type { RouletteMode } from '@/types';
 
 interface CreateRouletteModalProps {
-  open:    boolean;
-  onClose: () => void;
+  open:     boolean;
+  onClose:  () => void;
+  groupId?: string;
 }
 
 interface SegmentInput {
@@ -17,7 +18,7 @@ interface SegmentInput {
   weight: number;
 }
 
-export function CreateRouletteModal({ open, onClose }: CreateRouletteModalProps) {
+export function CreateRouletteModal({ open, onClose, groupId }: CreateRouletteModalProps) {
   const queryClient = useQueryClient();
 
   const [name, setName]               = useState('');
@@ -45,11 +46,13 @@ export function CreateRouletteModal({ open, onClose }: CreateRouletteModalProps)
       name,
       mode,
       isSurpriseMode: surprise,
+      groupId: groupId ?? null,
       segments: segments.map(s => ({ label: s.label.trim(), weight: s.weight })),
     }),
     onSuccess: () => {
       toast.success('Roulette créée !');
       queryClient.invalidateQueries({ queryKey: ['my-roulettes'] });
+      if (groupId) queryClient.invalidateQueries({ queryKey: ['group-roulettes', groupId] });
       onClose();
       setName('');
       setMode('EQUAL');
