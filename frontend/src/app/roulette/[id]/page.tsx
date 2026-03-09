@@ -4,7 +4,7 @@ import { useState, useCallback, useEffect } from 'react';
 import { useParams, useRouter }             from 'next/navigation';
 import { motion, AnimatePresence }          from 'framer-motion';
 import { useQuery, useMutation }            from '@tanstack/react-query';
-import { rouletteApi }                      from '@/lib/api';
+import { rouletteApi, groupApi }            from '@/lib/api';
 import { useAuth }                          from '@/hooks/useAuth';
 import { useGroupSocket }                   from '@/hooks/useGroupSocket';
 import { useSpinAnimation }                 from '@/hooks/useSpinAnimation';
@@ -12,12 +12,12 @@ import { RouletteWheel }                    from '@/components/roulette/Roulette
 import { SpinButton }                       from '@/components/roulette/SpinButton';
 import { SpinResultCard }                   from '@/components/roulette/SpinResultCard';
 import { toast }                            from '@/components/ui/Toast';
-import type { Roulette, SpinResponse, Segment, SpinSyncMessage } from '@/types';
+import type { Roulette, SpinResponse, Segment, SpinSyncMessage, GroupMember } from '@/types';
 
 export default function RoulettePage() {
   const { id }    = useParams<{ id: string }>();
   const router    = useRouter();
-  const { isAuthenticated, isLoading: authLoading } = useAuth();
+  const { user, isAuthenticated, isLoading: authLoading } = useAuth();
 
   const [winner, setWinner]             = useState<Segment | null>(null);
   const [showResult, setShowResult]     = useState(false);
@@ -33,7 +33,6 @@ export default function RoulettePage() {
   } = useSpinAnimation();
 
   // Spin synchronisé — quand un autre membre du groupe spinner
-  const { user } = useAuth();
   const handleSpinSync = useCallback((msg: SpinSyncMessage) => {
     if (msg.rouletteId !== id) return;         // pas cette roulette
     if (msg.spunBy === user?.id) return;       // c'est notre propre spin, déjà géré
@@ -70,6 +69,19 @@ export default function RoulettePage() {
     },
     enabled: !!id,
   });
+
+  // ── Membres du groupe (pour savoir si l'utilisateur est admin) ───────────────
+  const { data: members = [] } = useQuery<GroupMember[]>({
+    queryKey: ['group-members', roulette?.groupId],
+    queryFn:  async () => { const { data } = await groupApi.getMembers(roulette!.groupId!); return data; },
+    enabled:  !!roulette?.groupId,
+  });
+
+  const isCreator    = roulette?.creatorId === user?.id;
+  const isGroupAdmin = members.some(m => m.userId === user?.id && m.role === 'ADMIN');
+  // Pour une roulette personnelle, seul le créateur y a accès de toute façon
+  // Pour une roulette de groupe, seul le créateur ou un admin peut lancer le spin
+  const canSpin = roulette?.groupId ? (isCreator || isGroupAdmin) : true;
 
   // ── Spin mutation ───────────────────────────────────────────────────────────
   const spinMutation = useMutation<SpinResponse>({
@@ -204,8 +216,13 @@ export default function RoulettePage() {
         <SpinButton
           phase={phase}
           onClick={handleSpin}
-          disabled={spinMutation.isPending && !isSpinning}
+          disabled={(spinMutation.isPending && !isSpinning) || !canSpin}
         />
+        {!canSpin && (
+          <p className="mt-2 text-xs text-slate-500 text-center">
+            Seul le créateur ou un admin peut lancer la roue
+          </p>
+        )}
       </motion.div>
 
       {/* Phase indicator */}

@@ -30,7 +30,7 @@ const TABS: { id: Tab; label: string; icon: string }[] = [
 export default function GroupPage() {
   const { id }      = useParams<{ id: string }>();
   const router      = useRouter();
-  const { user, isAuthenticated } = useAuth();
+  const { user, isAuthenticated, isLoading: authLoading } = useAuth();
   const queryClient = useQueryClient();
 
   const [tab, setTab]                   = useState<Tab>('votes');
@@ -133,7 +133,7 @@ export default function GroupPage() {
 
   // ─── Render ───────────────────────────────────────────────────────────────
 
-  if (groupLoading) {
+  if (authLoading || groupLoading) {
     return (
       <div className="min-h-dvh bg-dark-bg flex items-center justify-center">
         <div className="w-10 h-10 rounded-full border-4 border-primary-500 border-t-transparent animate-spin" />

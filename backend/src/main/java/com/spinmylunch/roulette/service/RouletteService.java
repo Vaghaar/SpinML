@@ -256,7 +256,13 @@ public class RouletteService {
         rateLimitService.checkAndIncrementSpins(user.getId());
 
         Roulette roulette = findWithSegments(rouletteId);
-        requireReadAccess(roulette, user);
+
+        // Pour les roulettes de groupe : seul le créateur ou un admin peut lancer le spin
+        if (roulette.getGroup() != null) {
+            requireWriteAccess(roulette, user);
+        } else {
+            requireReadAccess(roulette, user);
+        }
 
         if (roulette.getStatus() != RouletteStatus.ACTIVE) {
             throw AppException.of(ErrorCode.ROULETTE_NOT_ACTIVE,
