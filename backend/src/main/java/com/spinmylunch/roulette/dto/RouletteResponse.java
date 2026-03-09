@@ -2,6 +2,7 @@ package com.spinmylunch.roulette.dto;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.spinmylunch.domain.roulette.RouletteMode;
+import com.spinmylunch.domain.roulette.RouletteStatus;
 
 import java.math.BigDecimal;
 import java.time.Instant;
@@ -15,6 +16,7 @@ public record RouletteResponse(
         String creatorName,
         String name,
         RouletteMode mode,
+        RouletteStatus status,
         boolean isSurpriseMode,
         List<SegmentResponse> segments,
 
@@ -26,6 +28,8 @@ public record RouletteResponse(
             String label,
             BigDecimal weight,
             String color,
-            int    position
+            int    position,
+            UUID   proposedById,
+            String proposedByName
     ) {}
 }

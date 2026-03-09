@@ -47,7 +47,9 @@ public class RouletteController {
 
     /**
      * POST /api/v1/roulettes
-     * Crée une nouvelle roulette (2-20 segments).
+     * Crée une nouvelle roulette.
+     * - Sans groupId : 2-20 segments requis, statut ACTIVE
+     * - Avec groupId et sans segments : statut PENDING (collecte de propositions)
      */
     @PostMapping
     public ResponseEntity<RouletteResponse> create(
@@ -83,6 +85,44 @@ public class RouletteController {
             @CurrentUser User user
     ) {
         return ResponseEntity.ok(rouletteService.update(id, request, user));
+    }
+
+    /**
+     * POST /api/v1/roulettes/:id/propose
+     * Propose un segment à une roulette en statut PENDING (tout membre du groupe).
+     */
+    @PostMapping("/{id}/propose")
+    public ResponseEntity<RouletteResponse> propose(
+            @PathVariable UUID id,
+            @RequestBody ProposeSegmentRequest request,
+            @CurrentUser User user
+    ) {
+        return ResponseEntity.ok(rouletteService.addProposal(id, request.label(), user));
+    }
+
+    /**
+     * DELETE /api/v1/roulettes/:id/segments/:segId
+     * Supprime un segment proposé (proposant ou créateur ou admin du groupe).
+     */
+    @DeleteMapping("/{id}/segments/{segId}")
+    public ResponseEntity<RouletteResponse> removeSegment(
+            @PathVariable UUID id,
+            @PathVariable UUID segId,
+            @CurrentUser User user
+    ) {
+        return ResponseEntity.ok(rouletteService.removeSegment(id, segId, user));
+    }
+
+    /**
+     * POST /api/v1/roulettes/:id/start
+     * Démarre la roulette PENDING → ACTIVE (admin du groupe uniquement, ≥ 2 segments).
+     */
+    @PostMapping("/{id}/start")
+    public ResponseEntity<RouletteResponse> start(
+            @PathVariable UUID id,
+            @CurrentUser User user
+    ) {
+        return ResponseEntity.ok(rouletteService.start(id, user));
     }
 
     /**

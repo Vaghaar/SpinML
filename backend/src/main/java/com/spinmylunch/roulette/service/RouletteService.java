@@ -59,20 +59,131 @@ public class RouletteService {
             requireGroupMember(group.getId(), creator.getId());
         }
 
+        boolean hasSegments = req.segments() != null && req.segments().size() >= 2;
+
+        // Roulette personnelle : segments obligatoires
+        if (req.groupId() == null && !hasSegments) {
+            throw AppException.of(ErrorCode.VALIDATION_ERROR,
+                    "Une roulette personnelle nécessite entre 2 et 20 segments");
+        }
+
+        // Roulette de groupe sans segments → PENDING (collecte de propositions)
+        RouletteStatus status = (req.groupId() != null && !hasSegments)
+                ? RouletteStatus.PENDING
+                : RouletteStatus.ACTIVE;
+
         Roulette roulette = Roulette.builder()
                 .group(group)
                 .creator(creator)
                 .name(req.name())
                 .mode(req.mode())
                 .isSurpriseMode(req.isSurpriseMode())
+                .status(status)
                 .build();
 
         roulette = rouletteRepository.save(roulette);
-        buildSegments(roulette, req.segments());
+
+        if (hasSegments) {
+            buildSegments(roulette, req.segments(), null);
+        }
 
         // Gamification : +20 XP à la création
         gamificationService.awardXpAndCheckBadges(
                 creator, GamificationService.XP_CREATE_ROULETTE, null);
+
+        return toResponse(roulette);
+    }
+
+    // ─── Proposer un segment (phase PENDING) ─────────────────────────────────
+
+    @Transactional
+    public RouletteResponse addProposal(UUID rouletteId, String label, User proposer) {
+        Roulette roulette = findWithSegments(rouletteId);
+        if (roulette.getStatus() != RouletteStatus.PENDING) {
+            throw AppException.of(ErrorCode.ROULETTE_NOT_PENDING);
+        }
+        if (roulette.getGroup() == null) {
+            throw AppException.of(ErrorCode.FORBIDDEN, "Les propositions ne sont disponibles que pour les roulettes de groupe");
+        }
+        requireGroupMember(roulette.getGroup().getId(), proposer.getId());
+
+        if (roulette.getSegments().size() >= 20) {
+            throw AppException.of(ErrorCode.VALIDATION_ERROR, "Maximum 20 segments atteint");
+        }
+
+        String color = DEFAULT_COLORS[roulette.getSegments().size() % DEFAULT_COLORS.length];
+        Segment segment = segmentRepository.save(
+                Segment.builder()
+                        .roulette(roulette)
+                        .label(label.trim())
+                        .weight(BigDecimal.ONE)
+                        .color(color)
+                        .position(roulette.getSegments().size())
+                        .proposedBy(proposer)
+                        .build()
+        );
+        roulette.getSegments().add(segment);
+
+        return toResponse(roulette);
+    }
+
+    // ─── Supprimer un segment proposé ────────────────────────────────────────
+
+    @Transactional
+    public RouletteResponse removeSegment(UUID rouletteId, UUID segmentId, User requester) {
+        Roulette roulette = findWithSegments(rouletteId);
+        if (roulette.getStatus() != RouletteStatus.PENDING) {
+            throw AppException.of(ErrorCode.ROULETTE_NOT_PENDING);
+        }
+
+        Segment segment = roulette.getSegments().stream()
+                .filter(s -> s.getId().equals(segmentId))
+                .findFirst()
+                .orElseThrow(() -> AppException.of(ErrorCode.VALIDATION_ERROR, "Segment introuvable"));
+
+        boolean isCreator   = roulette.getCreator().getId().equals(requester.getId());
+        boolean isProposer  = segment.getProposedBy() != null &&
+                              segment.getProposedBy().getId().equals(requester.getId());
+        boolean isAdmin     = roulette.getGroup() != null &&
+                              groupMemberRepository.findAdminMembership(
+                                      roulette.getGroup().getId(), requester.getId()).isPresent();
+
+        if (!isCreator && !isProposer && !isAdmin) {
+            throw AppException.of(ErrorCode.FORBIDDEN);
+        }
+
+        roulette.getSegments().remove(segment);
+        segmentRepository.delete(segment);
+
+        // Réindexer les positions
+        for (int i = 0; i < roulette.getSegments().size(); i++) {
+            roulette.getSegments().get(i).setPosition(i);
+        }
+
+        return toResponse(roulette);
+    }
+
+    // ─── Démarrer la roulette (PENDING → ACTIVE) ─────────────────────────────
+
+    @Transactional
+    public RouletteResponse start(UUID rouletteId, User requester) {
+        Roulette roulette = findWithSegments(rouletteId);
+
+        if (roulette.getStatus() != RouletteStatus.PENDING) {
+            throw AppException.of(ErrorCode.ROULETTE_NOT_PENDING);
+        }
+        if (roulette.getGroup() == null) {
+            throw AppException.of(ErrorCode.FORBIDDEN);
+        }
+
+        requireAdmin(roulette.getGroup().getId(), requester.getId());
+
+        if (roulette.getSegments().size() < 2) {
+            throw AppException.of(ErrorCode.NOT_ENOUGH_SEGMENTS);
+        }
+
+        roulette.setStatus(RouletteStatus.ACTIVE);
+        rouletteRepository.save(roulette);
 
         return toResponse(roulette);
     }
@@ -128,7 +239,7 @@ public class RouletteService {
 
         if (req.segments() != null) {
             roulette.getSegments().clear();
-            buildSegments(roulette, req.segments());
+            buildSegments(roulette, req.segments(), null);
         }
 
         return toResponse(rouletteRepository.save(roulette));
@@ -143,6 +254,11 @@ public class RouletteService {
 
         Roulette roulette = findWithSegments(rouletteId);
         requireReadAccess(roulette, user);
+
+        if (roulette.getStatus() != RouletteStatus.ACTIVE) {
+            throw AppException.of(ErrorCode.ROULETTE_NOT_ACTIVE,
+                    "La roulette est encore en phase de propositions");
+        }
 
         List<Segment> segments = roulette.getSegments();
         if (segments.isEmpty()) {
@@ -267,7 +383,13 @@ public class RouletteService {
         }
     }
 
-    private void buildSegments(Roulette roulette, List<SegmentDto> dtos) {
+    private void requireAdmin(UUID groupId, UUID userId) {
+        groupMemberRepository.findAdminMembership(groupId, userId)
+                .orElseThrow(() -> AppException.of(ErrorCode.FORBIDDEN,
+                        "Seul un admin peut démarrer la roulette"));
+    }
+
+    private void buildSegments(Roulette roulette, List<SegmentDto> dtos, User proposedBy) {
         List<Segment> segments = new ArrayList<>();
         for (int i = 0; i < dtos.size(); i++) {
             SegmentDto dto = dtos.get(i);
@@ -281,6 +403,7 @@ public class RouletteService {
                             .weight(weight)
                             .color(color)
                             .position(i)
+                            .proposedBy(proposedBy)
                             .build()
             ));
         }
@@ -290,7 +413,14 @@ public class RouletteService {
     private RouletteResponse toResponse(Roulette r) {
         List<RouletteResponse.SegmentResponse> segs = r.getSegments().stream()
                 .map(s -> new RouletteResponse.SegmentResponse(
-                        s.getId(), s.getLabel(), s.getWeight(), s.getColor(), s.getPosition()))
+                        s.getId(),
+                        s.getLabel(),
+                        s.getWeight(),
+                        s.getColor(),
+                        s.getPosition(),
+                        s.getProposedBy() != null ? s.getProposedBy().getId() : null,
+                        s.getProposedBy() != null ? s.getProposedBy().getName() : null
+                ))
                 .toList();
 
         return new RouletteResponse(
@@ -300,6 +430,7 @@ public class RouletteService {
                 r.getCreator().getName(),
                 r.getName(),
                 r.getMode(),
+                r.getStatus(),
                 r.isSurpriseMode(),
                 segs,
                 r.getCreatedAt()

@@ -11,7 +11,7 @@ import { useGroupSocket }                   from '@/hooks/useGroupSocket';
 import { VoteSessionCard }                  from '@/components/vote/VoteSessionCard';
 import { CreateVoteSessionModal }           from '@/components/vote/CreateVoteSessionModal';
 import { CreateRouletteModal }              from '@/components/roulette/CreateRouletteModal';
-import { RouletteCard }                     from '@/components/roulette/RouletteCard';
+import { GroupRouletteCard }               from '@/components/roulette/GroupRouletteCard';
 import { TopFoodsChart }                    from '@/components/charts/TopFoodsChart';
 import type { GroupMember, VoteSession, LiveVoteUpdate, StatsResponse, Roulette } from '@/types';
 
@@ -309,7 +309,13 @@ export default function GroupPage() {
             ) : (
               <div className="flex flex-col gap-3">
                 {roulettes.map((r, i) => (
-                  <RouletteCard key={r.id} roulette={r} index={i} />
+                  <GroupRouletteCard
+                    key={r.id}
+                    roulette={r}
+                    index={i}
+                    currentUserId={user?.id ?? ''}
+                    isAdmin={isAdmin}
+                  />
                 ))}
               </div>
             )}

@@ -126,13 +126,16 @@ export const profileApi = {
 
 export const rouletteApi = {
   getMyRoulettes: () => api.get('/roulettes'),
-  getByGroup: (groupId: string) => api.get('/roulettes', { params: { groupId } }),
-  create:     (data: unknown) => api.post('/roulettes', data),
-  getById:    (id: string)    => api.get(`/roulettes/${id}`),
-  update:     (id: string, data: unknown) => api.put(`/roulettes/${id}`, data),
-  delete:     (id: string)    => api.delete(`/roulettes/${id}`),
-  spin:       (id: string)    => api.post(`/roulettes/${id}/spin`),
-  getHistory: (id: string, page = 0, size = 20) =>
+  getByGroup:     (groupId: string) => api.get('/roulettes', { params: { groupId } }),
+  create:         (data: unknown) => api.post('/roulettes', data),
+  getById:        (id: string)    => api.get(`/roulettes/${id}`),
+  update:         (id: string, data: unknown) => api.put(`/roulettes/${id}`, data),
+  delete:         (id: string)    => api.delete(`/roulettes/${id}`),
+  propose:        (id: string, label: string) => api.post(`/roulettes/${id}/propose`, { label }),
+  removeSegment:  (id: string, segId: string) => api.delete(`/roulettes/${id}/segments/${segId}`),
+  start:          (id: string)    => api.post(`/roulettes/${id}/start`),
+  spin:           (id: string)    => api.post(`/roulettes/${id}/spin`),
+  getHistory:     (id: string, page = 0, size = 20) =>
     api.get(`/roulettes/${id}/history`, { params: { page, size } }),
 };
 

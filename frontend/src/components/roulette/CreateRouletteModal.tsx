@@ -20,6 +20,7 @@ interface SegmentInput {
 
 export function CreateRouletteModal({ open, onClose, groupId }: CreateRouletteModalProps) {
   const queryClient = useQueryClient();
+  const isGroupRoulette = !!groupId;
 
   const [name, setName]               = useState('');
   const [mode, setMode]               = useState<RouletteMode>('EQUAL');
@@ -47,10 +48,15 @@ export function CreateRouletteModal({ open, onClose, groupId }: CreateRouletteMo
       mode,
       isSurpriseMode: surprise,
       groupId: groupId ?? null,
-      segments: segments.map(s => ({ label: s.label.trim(), weight: s.weight })),
+      // Roulette de groupe : pas de segments → démarre en PENDING (collecte de propositions)
+      segments: isGroupRoulette
+        ? null
+        : segments.map(s => ({ label: s.label.trim(), weight: s.weight })),
     }),
     onSuccess: () => {
-      toast.success('Roulette créée !');
+      toast.success(isGroupRoulette
+        ? 'Roulette créée ! Les membres peuvent maintenant proposer des segments.'
+        : 'Roulette créée !');
       queryClient.invalidateQueries({ queryKey: ['my-roulettes'] });
       if (groupId) queryClient.invalidateQueries({ queryKey: ['group-roulettes', groupId] });
       onClose();
@@ -62,7 +68,8 @@ export function CreateRouletteModal({ open, onClose, groupId }: CreateRouletteMo
     onError: () => toast.error('Erreur', 'Impossible de créer la roulette.'),
   });
 
-  const isValid = name.trim().length >= 2 && segments.every(s => s.label.trim().length > 0);
+  const isValid = name.trim().length >= 2 &&
+    (isGroupRoulette || segments.every(s => s.label.trim().length > 0));
 
   return (
     <AnimatePresence>
@@ -84,6 +91,13 @@ export function CreateRouletteModal({ open, onClose, groupId }: CreateRouletteMo
                 <h2 className="font-title font-bold text-white text-xl">Nouvelle roulette</h2>
                 <button onClick={onClose} className="text-slate-400 hover:text-white transition-colors text-lg">✕</button>
               </div>
+
+              {/* Info mode groupe */}
+              {isGroupRoulette && (
+                <div className="bg-primary-500/10 border border-primary-500/20 rounded-xl px-4 py-3 text-sm text-primary-300">
+                  Les membres du groupe pourront proposer les segments après la création.
+                </div>
+              )}
 
               {/* Name */}
               <div className="flex flex-col gap-1.5">
@@ -128,53 +142,55 @@ export function CreateRouletteModal({ open, onClose, groupId }: CreateRouletteMo
                 <span className="text-sm text-slate-300">Mode Surprise 🎁 (masque les segments)</span>
               </label>
 
-              {/* Segments */}
-              <div className="flex flex-col gap-2">
-                <div className="flex items-center justify-between">
-                  <label className="text-xs text-slate-400 uppercase tracking-wider">
-                    Segments ({segments.length}/20)
-                  </label>
-                  <button
-                    onClick={addSegment}
-                    disabled={segments.length >= 20}
-                    className="text-xs text-primary-400 hover:text-primary-300 disabled:opacity-30 transition-colors"
-                  >
-                    + Ajouter
-                  </button>
-                </div>
+              {/* Segments — uniquement pour les roulettes personnelles */}
+              {!isGroupRoulette && (
+                <div className="flex flex-col gap-2">
+                  <div className="flex items-center justify-between">
+                    <label className="text-xs text-slate-400 uppercase tracking-wider">
+                      Segments ({segments.length}/20)
+                    </label>
+                    <button
+                      onClick={addSegment}
+                      disabled={segments.length >= 20}
+                      className="text-xs text-primary-400 hover:text-primary-300 disabled:opacity-30 transition-colors"
+                    >
+                      + Ajouter
+                    </button>
+                  </div>
 
-                <div className="flex flex-col gap-2 max-h-48 overflow-y-auto pr-1">
-                  {segments.map((seg, i) => (
-                    <div key={i} className="flex items-center gap-2">
-                      <input
-                        value={seg.label}
-                        onChange={e => updateSegment(i, 'label', e.target.value)}
-                        placeholder={`Segment ${i + 1}`}
-                        maxLength={255}
-                        className="flex-1 bg-white/5 border border-white/10 rounded-xl px-3 py-2 text-white placeholder-slate-600 focus:outline-none focus:border-primary-500 text-sm"
-                      />
-                      {mode === 'WEIGHTED' && (
+                  <div className="flex flex-col gap-2 max-h-48 overflow-y-auto pr-1">
+                    {segments.map((seg, i) => (
+                      <div key={i} className="flex items-center gap-2">
                         <input
-                          type="number"
-                          min={1}
-                          max={100}
-                          value={seg.weight}
-                          onChange={e => updateSegment(i, 'weight', Number(e.target.value))}
-                          className="w-14 text-center bg-white/5 border border-white/10 rounded-xl px-2 py-2 text-white text-sm focus:outline-none focus:border-primary-500"
+                          value={seg.label}
+                          onChange={e => updateSegment(i, 'label', e.target.value)}
+                          placeholder={`Segment ${i + 1}`}
+                          maxLength={255}
+                          className="flex-1 bg-white/5 border border-white/10 rounded-xl px-3 py-2 text-white placeholder-slate-600 focus:outline-none focus:border-primary-500 text-sm"
                         />
-                      )}
-                      <button
-                        onClick={() => removeSegment(i)}
-                        disabled={segments.length <= 2}
-                        className="text-slate-600 hover:text-red-400 disabled:opacity-20 transition-colors px-1"
-                        aria-label="Supprimer"
-                      >
-                        ✕
-                      </button>
-                    </div>
-                  ))}
+                        {mode === 'WEIGHTED' && (
+                          <input
+                            type="number"
+                            min={1}
+                            max={100}
+                            value={seg.weight}
+                            onChange={e => updateSegment(i, 'weight', Number(e.target.value))}
+                            className="w-14 text-center bg-white/5 border border-white/10 rounded-xl px-2 py-2 text-white text-sm focus:outline-none focus:border-primary-500"
+                          />
+                        )}
+                        <button
+                          onClick={() => removeSegment(i)}
+                          disabled={segments.length <= 2}
+                          className="text-slate-600 hover:text-red-400 disabled:opacity-20 transition-colors px-1"
+                          aria-label="Supprimer"
+                        >
+                          ✕
+                        </button>
+                      </div>
+                    ))}
+                  </div>
                 </div>
-              </div>
+              )}
 
               {/* Submit */}
               <button

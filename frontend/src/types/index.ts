@@ -34,14 +34,17 @@ export interface ApiError {
 
 // ─── Roulettes ────────────────────────────────────────────────────────────────
 
-export type RouletteMode = 'EQUAL' | 'WEIGHTED' | 'RANDOM';
+export type RouletteMode   = 'EQUAL' | 'WEIGHTED' | 'RANDOM';
+export type RouletteStatus = 'PENDING' | 'ACTIVE';
 
 export interface Segment {
-  id:       string;
-  label:    string;
-  weight:   number;
-  color:    string;
-  position: number;
+  id:              string;
+  label:           string;
+  weight:          number;
+  color:           string;
+  position:        number;
+  proposedById?:   string;
+  proposedByName?: string;
 }
 
 export interface Roulette {
@@ -51,6 +54,7 @@ export interface Roulette {
   creatorName:    string;
   name:           string;
   mode:           RouletteMode;
+  status:         RouletteStatus;
   isSurpriseMode: boolean;
   segments:       Segment[];
   createdAt:      string;

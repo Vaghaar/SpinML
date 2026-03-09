@@ -43,6 +43,11 @@ public class Roulette {
     @Builder.Default
     private boolean isSurpriseMode = false;
 
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    @Builder.Default
+    private RouletteStatus status = RouletteStatus.ACTIVE;
+
     @OneToMany(mappedBy = "roulette", cascade = CascadeType.ALL,
                orphanRemoval = true, fetch = FetchType.LAZY)
     @OrderBy("position ASC")

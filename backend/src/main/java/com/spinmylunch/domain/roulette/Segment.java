@@ -1,5 +1,6 @@
 package com.spinmylunch.domain.roulette;
 
+import com.spinmylunch.domain.user.User;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -36,6 +37,10 @@ public class Segment {
 
     @Column(nullable = false)
     private Integer position;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "proposed_by")
+    private User proposedBy;
 
     public double getWeightAsDouble() {
         return weight.doubleValue();

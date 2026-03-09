@@ -19,9 +19,10 @@ public record CreateRouletteRequest(
 
         boolean isSurpriseMode,
 
-        @NotNull
-        @Size(min = 2, max = 20, message = "Une roulette doit avoir entre 2 et 20 segments")
+        // Null ou vide = roulette en collecte de propositions (groupId requis dans ce cas)
+        // Pour une roulette personnelle : 2-20 segments requis
         @Valid
+        @Size(max = 20, message = "Maximum 20 segments")
         List<SegmentDto> segments
 ) {
     public CreateRouletteRequest {
