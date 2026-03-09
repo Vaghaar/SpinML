@@ -24,6 +24,9 @@ export default function RoulettePage() {
   const [lastSpinResp, setLastSpinResp] = useState<SpinResponse | null>(null);
   const [spinnerName, setSpinnerName]   = useState<string | null>(null);
 
+  // Vrai uniquement si CE device a déclenché le spin (pas un autre appareil du même user)
+  const spinInitiatedByMe = useRef(false);
+
   const {
     phase,
     currentAngle,
@@ -32,11 +35,18 @@ export default function RoulettePage() {
     reset,
   } = useSpinAnimation();
 
-  // Spin synchronisé — quand un autre membre du groupe spinner
+  // Spin synchronisé — quand un spin arrive via WebSocket (autre device ou autre membre)
   const handleSpinSync = useCallback((msg: SpinSyncMessage) => {
-    if (msg.rouletteId !== id) return;         // pas cette roulette
-    if (msg.spunBy === user?.id) return;       // c'est notre propre spin, déjà géré
-    if (isSpinning) return;                    // animation déjà en cours
+    if (msg.rouletteId !== id) return;   // pas cette roulette
+
+    // Si ce device a initié le spin, l'animation est déjà en cours via onSuccess
+    // → ignorer ce message mais réinitialiser le flag pour le prochain spin
+    if (spinInitiatedByMe.current) {
+      spinInitiatedByMe.current = false;
+      return;
+    }
+
+    if (isSpinning) return;              // animation déjà en cours
 
     setSpinnerName(msg.spunByName);
     setShowResult(false);
@@ -126,6 +136,7 @@ export default function RoulettePage() {
     setShowResult(false);
     setWinner(null);
     setSpinnerName(null);
+    spinInitiatedByMe.current = true;  // marquer que CE device a lancé le spin
     spinMutation.mutate();
   }, [isSpinning, isAuthenticated, router, spinMutation]);
 
