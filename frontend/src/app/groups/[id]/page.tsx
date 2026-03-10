@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useCallback, useEffect } from 'react';
+import { useState, useCallback, useEffect, useRef } from 'react';
 import { useParams, useRouter }             from 'next/navigation';
 import { motion }                           from 'framer-motion';
 import { useQuery, useQueryClient, useMutation } from '@tanstack/react-query';
@@ -13,8 +13,11 @@ import { VoteSessionCard }                  from '@/components/vote/VoteSessionC
 import { CreateVoteSessionModal }           from '@/components/vote/CreateVoteSessionModal';
 import { CreateRouletteModal }              from '@/components/roulette/CreateRouletteModal';
 import { GroupRouletteCard }               from '@/components/roulette/GroupRouletteCard';
+import { RouletteWheel }                   from '@/components/roulette/RouletteWheel';
+import { SpinResultCard }                  from '@/components/roulette/SpinResultCard';
 import { TopFoodsChart }                    from '@/components/charts/TopFoodsChart';
-import type { GroupMember, VoteSession, LiveVoteUpdate, StatsResponse, Roulette, RouletteUpdateMessage, SpinSyncMessage } from '@/types';
+import { useSpinAnimation }                from '@/hooks/useSpinAnimation';
+import type { GroupMember, VoteSession, LiveVoteUpdate, StatsResponse, Roulette, RouletteUpdateMessage, SpinSyncMessage, Segment } from '@/types';
 
 // ─── Tabs ─────────────────────────────────────────────────────────────────────
 
@@ -39,6 +42,52 @@ export default function GroupPage() {
   const [qrDataUrl, setQrDataUrl]       = useState('');
   const [copiedCode, setCopiedCode]     = useState(false);
   const [liveUpdates, setLiveUpdates]   = useState<Record<string, LiveVoteUpdate>>({});
+
+  // ─── Spin overlay (roue visible pour tous les membres) ───────────────────────
+  const [spinEvent, setSpinEvent]           = useState<SpinSyncMessage | null>(null);
+  const [overlaySegments, setOverlaySegments] = useState<Segment[] | null>(null);
+  const [showOverlayResult, setShowOverlayResult] = useState(false);
+
+  const {
+    phase:        overlayPhase,
+    currentAngle: overlayAngle,
+    startSpin:    startOverlaySpin,
+    reset:        resetOverlay,
+  } = useSpinAnimation();
+
+  // Ref pour éviter les dépendances cycliques avec startOverlaySpin
+  const startOverlaySpinRef = useRef(startOverlaySpin);
+  useEffect(() => { startOverlaySpinRef.current = startOverlaySpin; });
+
+  // Fetch la roulette et lance l'animation quand un spin arrive
+  useEffect(() => {
+    if (!spinEvent) return;
+    let cancelled = false;
+    rouletteApi.getById(spinEvent.rouletteId)
+      .then(({ data }) => {
+        if (cancelled) return;
+        setOverlaySegments(data.segments);
+        startOverlaySpinRef.current(spinEvent.serverAngle);
+      })
+      .catch(() => {
+        if (cancelled) return;
+        setSpinEvent(null);
+        toast.success(`${spinEvent.spunByName} a spinné : ${spinEvent.winningLabel} 🎡`);
+      });
+    return () => { cancelled = true; };
+  }, [spinEvent]);
+
+  // Affiche le résultat quand l'animation se termine
+  useEffect(() => {
+    if (overlayPhase === 'result') setShowOverlayResult(true);
+  }, [overlayPhase]);
+
+  const closeOverlay = useCallback(() => {
+    setSpinEvent(null);
+    setOverlaySegments(null);
+    setShowOverlayResult(false);
+    resetOverlay();
+  }, [resetOverlay]);
 
   // ─── Requêtes ─────────────────────────────────────────────────────────────
 
@@ -103,7 +152,8 @@ export default function GroupPage() {
   }, [queryClient, id]);
 
   const handleSpinSync = useCallback((msg: SpinSyncMessage) => {
-    toast.success(`${msg.spunByName} a spinné : ${msg.winningLabel} 🎡`);
+    setSpinEvent(msg);
+    setShowOverlayResult(false);
   }, []);
 
   useGroupSocket({
@@ -473,6 +523,33 @@ export default function GroupPage() {
         open={showCreateRoulette}
         onClose={() => setShowCreateRoulette(false)}
       />
+
+      {/* ── Spin overlay — visible pour tous les membres quand quelqu'un spin ── */}
+      {spinEvent && overlaySegments && (
+        <div className="fixed inset-0 z-50 bg-black/90 backdrop-blur-sm flex flex-col items-center justify-center gap-4">
+          <p className="text-slate-400 text-sm font-semibold uppercase tracking-wider">
+            {spinEvent.spunByName} a lancé la roue !
+          </p>
+          <div className="relative">
+            <RouletteWheel
+              segments={overlaySegments}
+              currentAngle={overlayAngle}
+              phase={overlayPhase}
+              winningSegmentId={overlayPhase === 'result' ? spinEvent.winningSegmentId : undefined}
+              size={300}
+            />
+            <SpinResultCard
+              visible={showOverlayResult}
+              winner={overlaySegments.find(s => s.id === spinEvent.winningSegmentId) ?? null}
+              onDismiss={closeOverlay}
+              spinnerName={spinEvent.spunByName}
+            />
+          </div>
+          {!showOverlayResult && (
+            <p className="text-xs text-slate-600 animate-pulse">La roue tourne…</p>
+          )}
+        </div>
+      )}
     </div>
   );
 }

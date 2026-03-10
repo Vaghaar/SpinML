@@ -1,10 +1,10 @@
 'use client';
 
-import { useState, useCallback, useEffect } from 'react';
+import { useState, useCallback, useEffect, useRef } from 'react';
 import { useParams, useRouter }             from 'next/navigation';
 import { motion, AnimatePresence }          from 'framer-motion';
 import { useQuery, useMutation }            from '@tanstack/react-query';
-import { rouletteApi, groupApi }            from '@/lib/api';
+import { rouletteApi }                      from '@/lib/api';
 import { useAuth }                          from '@/hooks/useAuth';
 import { useGroupSocket }                   from '@/hooks/useGroupSocket';
 import { useSpinAnimation }                 from '@/hooks/useSpinAnimation';
@@ -12,7 +12,7 @@ import { RouletteWheel }                    from '@/components/roulette/Roulette
 import { SpinButton }                       from '@/components/roulette/SpinButton';
 import { SpinResultCard }                   from '@/components/roulette/SpinResultCard';
 import { toast }                            from '@/components/ui/Toast';
-import type { Roulette, SpinResponse, Segment, SpinSyncMessage, GroupMember } from '@/types';
+import type { Roulette, SpinResponse, Segment, SpinSyncMessage } from '@/types';
 
 export default function RoulettePage() {
   const { id }    = useParams<{ id: string }>();
@@ -45,16 +45,8 @@ export default function RoulettePage() {
     enabled: !!id,
   });
 
-  // ── Membres du groupe (pour savoir si l'utilisateur est admin) ───────────────
-  const { data: members = [] } = useQuery<GroupMember[]>({
-    queryKey: ['group-members', roulette?.groupId],
-    queryFn:  async () => { const { data } = await groupApi.getMembers(roulette!.groupId!); return data; },
-    enabled:  !!roulette?.groupId,
-  });
-
-  const isCreator    = roulette?.creatorId === user?.id;
-  const isGroupAdmin = members.some(m => m.userId === user?.id && m.role === 'ADMIN');
-  const canSpin      = roulette?.groupId ? (isCreator || isGroupAdmin) : true;
+  const isCreator = roulette?.creatorId === user?.id;
+  const canSpin   = roulette?.groupId ? isCreator : true;
 
   // ── Spin synchronisé — reçu via WebSocket depuis les autres appareils ────────
   // IMPORTANT : doit être déclaré APRÈS useQuery(roulette) pour que roulette soit défini
