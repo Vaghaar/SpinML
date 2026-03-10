@@ -20,8 +20,9 @@ public record AppProperties(
 ) {
     public record Jwt(
             @NotBlank String secret,
-            @DefaultValue("900")   long accessTokenExpiration,   // seconds
-            @DefaultValue("604800") long refreshTokenExpiration   // seconds
+            @DefaultValue("900")    long accessTokenExpiration,    // seconds
+            @DefaultValue("604800") long refreshTokenExpiration,   // seconds
+            @DefaultValue("true")   boolean cookieSecure           // false en dev HTTP
     ) {}
 
     public record Cors(

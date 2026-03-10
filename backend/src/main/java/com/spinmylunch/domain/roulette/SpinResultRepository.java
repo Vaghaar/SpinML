@@ -31,4 +31,8 @@ public interface SpinResultRepository extends JpaRepository<SpinResult, UUID> {
 
     @Query("SELECT COUNT(sr) FROM SpinResult sr WHERE sr.group.id = :groupId")
     long countByGroupId(@Param("groupId") UUID groupId);
+
+    void deleteByRouletteId(UUID rouletteId);
+
+    void deleteByWinningSegmentId(UUID winningSegmentId);
 }

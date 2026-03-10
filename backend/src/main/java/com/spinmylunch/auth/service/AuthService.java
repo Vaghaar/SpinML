@@ -207,16 +207,18 @@ public class AuthService {
     }
 
     private void setRefreshCookie(HttpServletResponse response, String token, int maxAge) {
+        boolean secure = appProperties.jwt().cookieSecure();
         String cookie = String.format(
-                "%s=%s; Max-Age=%d; Path=/api/v1/auth; HttpOnly; SameSite=Strict; Secure",
-                REFRESH_COOKIE_NAME, token, maxAge);
+                "%s=%s; Max-Age=%d; Path=/api/v1/auth; HttpOnly; SameSite=Strict%s",
+                REFRESH_COOKIE_NAME, token, maxAge, secure ? "; Secure" : "");
         response.addHeader("Set-Cookie", cookie);
     }
 
     private void clearRefreshCookie(HttpServletResponse response) {
+        boolean secure = appProperties.jwt().cookieSecure();
         String cookie = String.format(
-                "%s=; Max-Age=0; Path=/api/v1/auth; HttpOnly; SameSite=Strict; Secure",
-                REFRESH_COOKIE_NAME);
+                "%s=; Max-Age=0; Path=/api/v1/auth; HttpOnly; SameSite=Strict%s",
+                REFRESH_COOKIE_NAME, secure ? "; Secure" : "");
         response.addHeader("Set-Cookie", cookie);
     }
 

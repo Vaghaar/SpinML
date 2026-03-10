@@ -153,6 +153,7 @@ public class RouletteService {
             throw AppException.of(ErrorCode.FORBIDDEN);
         }
 
+        spinResultRepository.deleteByWinningSegmentId(segmentId);
         roulette.getSegments().remove(segment);
         segmentRepository.delete(segment);
 
@@ -217,6 +218,7 @@ public class RouletteService {
         if (!roulette.getCreator().getId().equals(requester.getId())) {
             throw AppException.of(ErrorCode.FORBIDDEN);
         }
+        spinResultRepository.deleteByRouletteId(id);
         rouletteRepository.delete(roulette);
     }
 
