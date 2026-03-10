@@ -20,7 +20,7 @@ class JwtServiceTest {
         AppProperties props = new AppProperties(
                 new AppProperties.Jwt(
                         "test_secret_key_at_least_256_bits_long_for_hs256_algorithm_padding_here",
-                        900L, 604800L),
+                        900L, 604800L, false),
                 "http://localhost:3000",
                 new AppProperties.Cors(List.of("http://localhost:3000")),
                 new AppProperties.RateLimit(100, 10, 5),
