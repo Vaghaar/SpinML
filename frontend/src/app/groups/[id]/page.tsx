@@ -125,7 +125,7 @@ export default function GroupPage() {
 
   // ─── Dérivé ───────────────────────────────────────────────────────────────
 
-  const isAdmin         = members.some(m => m.userId === user?.id && m.role === 'ADMIN');
+  const isAdmin         = !!group && !!user && group.adminId === user.id;
   const activeSessions  = sessions.filter(s => s.status === 'ACTIVE');
   const pendingSessions = sessions.filter(s => s.status === 'PENDING');
   const closedSessions  = sessions.filter(s => s.status === 'CLOSED');

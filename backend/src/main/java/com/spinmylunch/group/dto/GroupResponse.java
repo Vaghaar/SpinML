@@ -9,5 +9,6 @@ public record GroupResponse(
     String  inviteCode,
     String  inviteQrUrl,
     int     memberCount,
+    UUID    adminId,
     Instant createdAt
 ) {}

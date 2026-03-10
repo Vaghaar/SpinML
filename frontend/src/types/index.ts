@@ -89,6 +89,8 @@ export interface Group {
   name:         string;
   inviteCode:   string;
   inviteQrUrl?: string;
+  memberCount:  number;
+  adminId:      string;
   createdAt:    string;
 }
 

@@ -155,6 +155,6 @@ public class GroupService {
 
     private GroupResponse toResponse(Group g, int memberCount) {
         return new GroupResponse(g.getId(), g.getName(), g.getInviteCode(),
-                g.getInviteQrUrl(), memberCount, g.getCreatedAt());
+                g.getInviteQrUrl(), memberCount, g.getAdmin().getId(), g.getCreatedAt());
     }
 }
