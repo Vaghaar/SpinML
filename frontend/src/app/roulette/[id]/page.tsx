@@ -6,7 +6,7 @@ import { motion, AnimatePresence }          from 'framer-motion';
 import { useQuery, useMutation }            from '@tanstack/react-query';
 import { rouletteApi }                      from '@/lib/api';
 import { useAuth }                          from '@/hooks/useAuth';
-import { useGroupSocket }                   from '@/hooks/useGroupSocket';
+import { useRouletteSocket }                from '@/hooks/useRouletteSocket';
 import { useSpinAnimation }                 from '@/hooks/useSpinAnimation';
 import { RouletteWheel }                    from '@/components/roulette/RouletteWheel';
 import { SpinButton }                       from '@/components/roulette/SpinButton';
@@ -77,9 +77,9 @@ export default function RoulettePage() {
     startSpin(msg.serverAngle);
   }, [id, isSpinning, startSpin]);
 
-  // groupId disponible maintenant que roulette est déclaré
-  useGroupSocket({
-    groupId: roulette?.groupId ?? null,
+  // id disponible immédiatement depuis l'URL — pas besoin d'attendre le fetch
+  useRouletteSocket({
+    rouletteId: id,
     onSpinSync: handleSpinSync,
   });
 

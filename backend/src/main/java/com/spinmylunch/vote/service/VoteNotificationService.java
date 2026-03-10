@@ -38,6 +38,10 @@ public class VoteNotificationService {
         return "/topic/group/" + groupId + "/spin";
     }
 
+    private static String rouletteSpinTopic(UUID rouletteId) {
+        return "/topic/roulette/" + rouletteId + "/spin";
+    }
+
     private static String rouletteTopic(UUID groupId) {
         return "/topic/group/" + groupId + "/roulette";
     }
@@ -114,8 +118,12 @@ public class VoteNotificationService {
      * Tous reçoivent le même serverAngle et animent simultanément.
      */
     public void broadcastSpinResult(UUID groupId, SpinSyncMessage message) {
+        // Broadcast au topic groupe (overlay sur la page groupe)
         messagingTemplate.convertAndSend(spinTopic(groupId), message);
-        log.debug("Spin sync broadcasté → {} (angle={})", spinTopic(groupId), message.serverAngle());
+        // Broadcast au topic roulette (animation directe sur la page roulette)
+        messagingTemplate.convertAndSend(rouletteSpinTopic(message.rouletteId()), message);
+        log.debug("Spin sync broadcasté → {} et {} (angle={})",
+                spinTopic(groupId), rouletteSpinTopic(message.rouletteId()), message.serverAngle());
     }
 
     // ─── Calcul des résultats ─────────────────────────────────────────────────
