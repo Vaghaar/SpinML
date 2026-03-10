@@ -219,6 +219,7 @@ public class RouletteService {
             throw AppException.of(ErrorCode.FORBIDDEN);
         }
         spinResultRepository.deleteByRouletteId(id);
+        spinResultRepository.deleteByWinningSegmentRouletteId(id);
         rouletteRepository.delete(roulette);
     }
 

@@ -40,4 +40,8 @@ public interface SpinResultRepository extends JpaRepository<SpinResult, UUID> {
     @Modifying(flushAutomatically = true, clearAutomatically = true)
     @Query("DELETE FROM SpinResult sr WHERE sr.winningSegment.id = :winningSegmentId")
     void deleteByWinningSegmentId(@Param("winningSegmentId") UUID winningSegmentId);
+
+    @Modifying(flushAutomatically = true, clearAutomatically = true)
+    @Query("DELETE FROM SpinResult sr WHERE sr.winningSegment.roulette.id = :rouletteId")
+    void deleteByWinningSegmentRouletteId(@Param("rouletteId") UUID rouletteId);
 }
