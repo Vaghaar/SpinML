@@ -3,6 +3,7 @@ package com.spinmylunch.domain.roulette;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
@@ -32,7 +33,11 @@ public interface SpinResultRepository extends JpaRepository<SpinResult, UUID> {
     @Query("SELECT COUNT(sr) FROM SpinResult sr WHERE sr.group.id = :groupId")
     long countByGroupId(@Param("groupId") UUID groupId);
 
-    void deleteByRouletteId(UUID rouletteId);
+    @Modifying(flushAutomatically = true, clearAutomatically = true)
+    @Query("DELETE FROM SpinResult sr WHERE sr.roulette.id = :rouletteId")
+    void deleteByRouletteId(@Param("rouletteId") UUID rouletteId);
 
-    void deleteByWinningSegmentId(UUID winningSegmentId);
+    @Modifying(flushAutomatically = true, clearAutomatically = true)
+    @Query("DELETE FROM SpinResult sr WHERE sr.winningSegment.id = :winningSegmentId")
+    void deleteByWinningSegmentId(@Param("winningSegmentId") UUID winningSegmentId);
 }
