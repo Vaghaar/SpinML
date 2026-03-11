@@ -42,8 +42,10 @@ export default function LandingPage() {
       {/* Gradient overlays */}
       <div className="absolute inset-0 bg-gradient-to-b from-dark-bg/95 via-dark-bg/65 to-dark-bg/95 pointer-events-none" />
 
-      {/* Purple radial glow behind hero */}
-      <div className="absolute top-1/3 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[700px] h-[700px] bg-primary-700/25 rounded-full blur-3xl pointer-events-none" />
+      {/* Atmospheric blobs (pickthewheel-style) */}
+      <div className="blob-pink top-[-200px] left-[-200px]" />
+      <div className="blob-cyan bottom-[-150px] right-[-150px]" />
+      <div className="blob-orange top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2" />
 
       {/* Content */}
       <div className="relative z-10 flex flex-col items-center text-center px-6 max-w-2xl mx-auto">

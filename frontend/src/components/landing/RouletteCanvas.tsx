@@ -3,14 +3,14 @@
 import { useEffect, useRef } from 'react';
 
 const SEGMENTS = [
-  { color: '#FF6B35', label: '🍕' },
-  { color: '#FFD700', label: '🌮' },
-  { color: '#7C3AED', label: '🍣' },
-  { color: '#00B894', label: '🥗' },
-  { color: '#FD79A8', label: '🍔' },
-  { color: '#0984E3', label: '🍜' },
-  { color: '#E17055', label: '🍱' },
-  { color: '#6C5CE7', label: '🥙' },
+  { color: '#F82F77', label: '🍕' },
+  { color: '#06B6D4', label: '🌮' },
+  { color: '#FF6B35', label: '🍣' },
+  { color: '#22D3EE', label: '🥗' },
+  { color: '#FF4D90', label: '🍔' },
+  { color: '#0891B2', label: '🍜' },
+  { color: '#FF8152', label: '🍱' },
+  { color: '#D91A5F', label: '🥙' },
 ];
 
 interface RouletteCanvasProps {
@@ -116,8 +116,8 @@ export function RouletteCanvas({ className = '' }: RouletteCanvasProps) {
       const pulseR = r * 0.1 + Math.sin(pulse) * r * 0.008;
 
       const center = ctx.createRadialGradient(cx, cy, 0, cx, cy, pulseR);
-      center.addColorStop(0, '#FF6B35');
-      center.addColorStop(1, '#7C3AED');
+      center.addColorStop(0, '#F82F77');
+      center.addColorStop(1, '#06020C');
       ctx.beginPath();
       ctx.arc(cx, cy, pulseR, 0, 2 * Math.PI);
       ctx.fillStyle = center;

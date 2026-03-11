@@ -1,16 +1,13 @@
 @import "tailwindcss";
 
-/* ─── Google Fonts ─────────────────────────────────────────────────────────── */
-@import url("https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap");
-
-/* ─── CSS Variables Spinmylunch ────────────────────────────────────────────── */
+/* ─── CSS Variables Spinmylunch (pickthewheel palette) ───────────────────── */
 :root {
-  --color-primary:    #7C3AED;
-  --color-secondary:  #FFD700;
+  --color-primary:    #F82F77;
+  --color-secondary:  #06B6D4;
   --color-accent:     #FF6B35;
-  --color-bg-dark:    #0D0614;
-  --color-surface:    #160A2A;
-  --color-card:       #1E0F3A;
+  --color-bg-dark:    #06020C;
+  --color-surface:    #0D0614;
+  --color-card:       #140920;
 
   /* Animation timing */
   --spin-anticipation: 0.5s;
@@ -45,11 +42,15 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
-/* ─── Typography ────────────────────────────────────────────────────────────── */
+/* ─── Typography ───────────────────────────────────────────────────────────── */
 h1, h2, h3, h4, h5, h6 {
-  font-family: "Nunito", sans-serif;
+  font-family: "Roboto Slab", serif;
   font-weight: 800;
   line-height: 1.2;
+}
+
+.font-title {
+  font-family: "Roboto Slab", serif;
 }
 
 .font-accent {
@@ -57,50 +58,85 @@ h1, h2, h3, h4, h5, h6 {
   font-weight: 700;
 }
 
-/* ─── Scrollbar ─────────────────────────────────────────────────────────────── */
+/* ─── Scrollbar ────────────────────────────────────────────────────────────── */
 ::-webkit-scrollbar { width: 5px; height: 5px; }
 ::-webkit-scrollbar-track { background: var(--color-surface); }
 ::-webkit-scrollbar-thumb { background: var(--color-primary); border-radius: 10px; }
 
-/* ─── Utilitaires ──────────────────────────────────────────────────────────── */
+/* ─── Gradient text ────────────────────────────────────────────────────────── */
 .gradient-text {
-  background: linear-gradient(135deg, #A78BFA, #FFD700);
+  background: linear-gradient(135deg, #F82F77, #06B6D4);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
 }
 
 .gradient-text-accent {
-  background: linear-gradient(135deg, #FF6B35, #FFD700);
+  background: linear-gradient(135deg, #FF6B35, #F82F77);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
 }
 
+/* ─── Glass surfaces ───────────────────────────────────────────────────────── */
 .glass {
-  background: rgba(30, 15, 58, 0.75);
+  background: rgba(20, 9, 32, 0.75);
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
-  border: 1px solid rgba(124, 58, 237, 0.18);
+  border: 1px solid rgba(248, 47, 119, 0.15);
 }
 
 .glass-light {
-  background: rgba(255, 255, 255, 0.06);
+  background: rgba(255, 255, 255, 0.05);
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.08);
 }
 
 .neon-border {
   border: 1px solid var(--color-primary);
-  box-shadow: 0 0 14px rgba(124, 58, 237, 0.45),
-              inset 0 0 14px rgba(124, 58, 237, 0.06);
+  box-shadow: 0 0 14px rgba(248, 47, 119, 0.45),
+              inset 0 0 14px rgba(248, 47, 119, 0.06);
 }
 
 .card-hero {
-  background: linear-gradient(135deg, #2D1B69, #1E0F3A);
-  border: 1px solid rgba(124, 58, 237, 0.35);
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(124, 58, 237, 0.1);
+  background: linear-gradient(135deg, #2A0A1F, #140920);
+  border: 1px solid rgba(248, 47, 119, 0.3);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.6), 0 0 0 1px rgba(248, 47, 119, 0.08);
+}
+
+/* ─── Atmospheric blob decorations (pickthewheel-style) ───────────────────── */
+.blob-pink {
+  position: absolute;
+  width: 700px;
+  height: 700px;
+  border-radius: 50%;
+  background: radial-gradient(ellipse, rgba(248, 47, 119, 0.18) 0%, transparent 65%);
+  filter: blur(80px);
+  pointer-events: none;
+  z-index: 0;
+}
+
+.blob-cyan {
+  position: absolute;
+  width: 600px;
+  height: 600px;
+  border-radius: 50%;
+  background: radial-gradient(ellipse, rgba(6, 182, 212, 0.15) 0%, transparent 65%);
+  filter: blur(80px);
+  pointer-events: none;
+  z-index: 0;
+}
+
+.blob-orange {
+  position: absolute;
+  width: 500px;
+  height: 500px;
+  border-radius: 50%;
+  background: radial-gradient(ellipse, rgba(255, 107, 53, 0.12) 0%, transparent 65%);
+  filter: blur(80px);
+  pointer-events: none;
+  z-index: 0;
 }
 
 /* ─── Animations ───────────────────────────────────────────────────────────── */
@@ -133,17 +169,7 @@ h1, h2, h3, h4, h5, h6 {
   100% { background-position:  200% center; }
 }
 
-/* ─── Theme : Light ────────────────────────────────────────────────────────── */
-.theme-light body {
-  background-color: #F8F9FA;
-  color: #2D3436;
-}
-
-/* ─── Theme : Neon ─────────────────────────────────────────────────────────── */
-.theme-neon body {
-  background-color: #0D0D0D;
-}
-.theme-neon .glass {
-  border-color: rgba(124, 58, 237, 0.4);
-  box-shadow: 0 0 20px rgba(124, 58, 237, 0.2);
+@keyframes glow-pulse {
+  0%, 100% { box-shadow: 0 0 20px rgba(248, 47, 119, 0.4); }
+  50%       { box-shadow: 0 0 40px rgba(248, 47, 119, 0.7), 0 0 80px rgba(248, 47, 119, 0.3); }
 }

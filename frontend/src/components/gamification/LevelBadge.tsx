@@ -47,8 +47,8 @@ export function LevelBadge({ level, xp, size = 'md' }: LevelBadgeProps) {
           />
           <defs>
             <linearGradient id="lvlGrad" x1="0%" y1="0%" x2="100%" y2="0%">
-              <stop offset="0%" stopColor="#FF6B35" />
-              <stop offset="100%" stopColor="#FFD700" />
+              <stop offset="0%" stopColor="#F82F77" />
+              <stop offset="100%" stopColor="#06B6D4" />
             </linearGradient>
           </defs>
         </svg>

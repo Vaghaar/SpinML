@@ -12,12 +12,12 @@ interface SpinButtonProps {
 }
 
 const PHASE_CONFIG: Record<SpinPhase, { label: string; className: string; pulse: boolean }> = {
-  idle:         { label: '🎡  LANCER !',       className: 'bg-gradient-to-r from-accent-500 to-accent-600 hover:from-accent-400 hover:to-accent-500', pulse: true  },
-  anticipation: { label: '⚡ Chargement…',      className: 'bg-gradient-to-r from-secondary-500 to-yellow-500',                                        pulse: false },
-  acceleration: { label: '🌀 En route !',       className: 'bg-gradient-to-r from-primary-600 to-primary-700',                                         pulse: false },
-  deceleration: { label: '🎯 Presque…',         className: 'bg-gradient-to-r from-primary-600 to-primary-700',                                         pulse: false },
-  revelation:   { label: '✨ Révélation !',     className: 'bg-gradient-to-r from-secondary-500 to-yellow-400',                                         pulse: false },
-  result:       { label: '🔄 Relancer',         className: 'bg-gradient-to-r from-accent-500 to-accent-600 hover:from-accent-400 hover:to-accent-500', pulse: true  },
+  idle:         { label: '🎡  LANCER !',       className: 'bg-gradient-to-r from-primary-500 to-primary-600 hover:from-primary-400 hover:to-primary-500', pulse: true  },
+  anticipation: { label: '⚡ Chargement…',      className: 'bg-gradient-to-r from-secondary-500 to-secondary-600',                                         pulse: false },
+  acceleration: { label: '🌀 En route !',       className: 'bg-gradient-to-r from-primary-600 to-primary-700',                                            pulse: false },
+  deceleration: { label: '🎯 Presque…',         className: 'bg-gradient-to-r from-primary-600 to-primary-700',                                            pulse: false },
+  revelation:   { label: '✨ Révélation !',     className: 'bg-gradient-to-r from-secondary-400 to-secondary-500',                                         pulse: false },
+  result:       { label: '🔄 Relancer',         className: 'bg-gradient-to-r from-primary-500 to-primary-600 hover:from-primary-400 hover:to-primary-500', pulse: true  },
 };
 
 export function SpinButton({ phase, onClick, disabled, className }: SpinButtonProps) {
@@ -33,9 +33,9 @@ export function SpinButton({ phase, onClick, disabled, className }: SpinButtonPr
       whileTap={isClickable   ? { scale: 0.96 } : {}}
       animate={config.pulse
         ? { boxShadow: [
-            '0 0 25px rgba(255,107,53,0.5), 0 4px 20px rgba(0,0,0,0.4)',
-            '0 0 55px rgba(255,107,53,0.9), 0 4px 20px rgba(0,0,0,0.4)',
-            '0 0 25px rgba(255,107,53,0.5), 0 4px 20px rgba(0,0,0,0.4)',
+            '0 0 25px rgba(248,47,119,0.5), 0 4px 20px rgba(0,0,0,0.4)',
+            '0 0 55px rgba(248,47,119,0.9), 0 4px 20px rgba(0,0,0,0.4)',
+            '0 0 25px rgba(248,47,119,0.5), 0 4px 20px rgba(0,0,0,0.4)',
           ] }
         : {}
       }

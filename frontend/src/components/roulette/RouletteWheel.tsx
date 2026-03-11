@@ -6,14 +6,14 @@ import type { SpinPhase } from '@/hooks/useSpinAnimation';
 
 // Segment colors (cycling)
 const SEGMENT_COLORS = [
-  '#FF6B35', '#FFD700', '#7C3AED', '#06B6D4',
-  '#10B981', '#F59E0B', '#EF4444', '#8B5CF6',
-  '#EC4899', '#14B8A6', '#F97316', '#6366F1',
+  '#F82F77', '#06B6D4', '#FF6B35', '#22D3EE',
+  '#FF4D90', '#0891B2', '#FF8152', '#67E8F9',
+  '#D91A5F', '#0E7490', '#FF6B35', '#F82F77',
 ];
 
 const POINTER_COLOR   = '#FFFFFF';
-const HUB_OUTER_COLOR = '#1A1A2E';
-const HUB_INNER_COLOR = '#FF6B35';
+const HUB_OUTER_COLOR = '#06020C';
+const HUB_INNER_COLOR = '#F82F77';
 const BORDER_COLOR    = 'rgba(255,255,255,0.15)';
 
 interface RouletteWheelProps {

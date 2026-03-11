@@ -46,9 +46,9 @@ export function SpinResultCard({ visible, winner, onDismiss, spinnerName }: Spin
           <div
             className="relative rounded-3xl p-8 max-w-xs w-full text-center"
             style={{
-              background:  'linear-gradient(135deg, #2D1B69 0%, #1E0F3A 100%)',
-              border:      '2px solid rgba(124,58,237,0.55)',
-              boxShadow:   '0 0 80px rgba(124,58,237,0.3), 0 24px 48px rgba(0,0,0,0.6), inset 0 0 40px rgba(124,58,237,0.08)',
+              background:  'linear-gradient(135deg, #2A0A1F 0%, #140920 100%)',
+              border:      '2px solid rgba(248,47,119,0.55)',
+              boxShadow:   '0 0 80px rgba(248,47,119,0.3), 0 24px 48px rgba(0,0,0,0.6), inset 0 0 40px rgba(248,47,119,0.08)',
             }}
           >
             {/* Big celebration emoji */}
@@ -104,9 +104,9 @@ function fireConfetti() {
     confetti({ ...opts, origin, particleCount: Math.floor(count * particleRatio) });
   }
 
-  fire(0.25, { spread: 26, startVelocity: 55, colors: ['#A78BFA', '#FFD700'] });
-  fire(0.20, { spread: 60, colors: ['#7C3AED', '#FF6B35'] });
-  fire(0.35, { spread: 100, decay: 0.91, scalar: 0.8, colors: ['#10B981', '#F59E0B'] });
-  fire(0.10, { spread: 120, startVelocity: 25, decay: 0.92, scalar: 1.2, colors: ['#A78BFA'] });
-  fire(0.10, { spread: 120, startVelocity: 45, colors: ['#FFD700', '#FFFFFF'] });
+  fire(0.25, { spread: 26, startVelocity: 55, colors: ['#F82F77', '#06B6D4'] });
+  fire(0.20, { spread: 60, colors: ['#FF6B9D', '#FF6B35'] });
+  fire(0.35, { spread: 100, decay: 0.91, scalar: 0.8, colors: ['#06B6D4', '#F82F77'] });
+  fire(0.10, { spread: 120, startVelocity: 25, decay: 0.92, scalar: 1.2, colors: ['#FFB3D0'] });
+  fire(0.10, { spread: 120, startVelocity: 45, colors: ['#06B6D4', '#FFFFFF'] });
 }

@@ -294,8 +294,8 @@ export default function RoulettePage() {
 // ─── Segment row component ────────────────────────────────────────────────────
 
 const COLORS = [
-  '#FF6B35', '#FFD700', '#7C3AED', '#06B6D4',
-  '#10B981', '#F59E0B', '#EF4444', '#8B5CF6',
+  '#F82F77', '#06B6D4', '#FF6B35', '#22D3EE',
+  '#FF4D90', '#0891B2', '#FF8152', '#67E8F9',
 ];
 
 function SegmentRow({ segment, index, isWinner }: {
