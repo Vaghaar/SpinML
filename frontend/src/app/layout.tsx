@@ -4,15 +4,15 @@ import "./globals.css";
 
 export const metadata: Metadata = {
   title: {
-    default:  "SpinMyLunch — La roulette qui décide pour toi",
-    template: "%s | SpinMyLunch",
+    default:  "Spinmylunch — La roulette qui décide pour toi",
+    template: "%s | Spinmylunch",
   },
   description:
-    "Fini l'indécision du midi ! SpinMyLunch te permet de choisir ton repas en 30 secondes grâce à une roulette collaborative et des votes en temps réel.",
-  keywords: ["repas", "déjeuner", "roulette", "vote", "équipe", "groupe"],
-  authors: [{ name: "SpinMyLunch" }],
+    "Fini l'indécision du midi ! Spinmylunch te permet de choisir ton repas en 30 secondes grâce à une roulette collaborative et des votes en temps réel.",
+  keywords: ["spinmylunch", "repas", "déjeuner", "roulette", "vote", "équipe", "groupe"],
+  authors: [{ name: "Spinmylunch" }],
   openGraph: {
-    title:       "SpinMyLunch — La roulette qui décide pour toi",
+    title:       "Spinmylunch — La roulette qui décide pour toi",
     description: "Fini l'indécision du midi !",
     type:        "website",
     locale:      "fr_FR",
