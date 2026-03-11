@@ -12,6 +12,7 @@ public record VoteSessionResponse(
         UUID id,
         UUID groupId,
         UUID rouletteId,
+        UUID tiebreakerRouletteId,
         VoteMode mode,
         VoteStatus status,
         int quorumPercent,

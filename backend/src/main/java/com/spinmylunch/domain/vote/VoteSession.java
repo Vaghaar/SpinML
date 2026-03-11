@@ -27,6 +27,11 @@ public class VoteSession {
     @JoinColumn(name = "roulette_id")
     private Roulette roulette;
 
+    /** Roulette de départage créée automatiquement en cas d'égalité */
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "tiebreaker_roulette_id")
+    private Roulette tiebreakerRoulette;
+
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "group_id", nullable = false)
     private Group group;

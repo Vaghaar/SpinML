@@ -62,6 +62,9 @@ public class VoteNotificationService {
         List<LiveVoteUpdate.OptionResult> results = computeOptionResults(
                 session.getOptions(), allVotes, session.getMode());
 
+        UUID tiebreakerRouletteId = session.getTiebreakerRoulette() != null
+                ? session.getTiebreakerRoulette().getId() : null;
+
         LiveVoteUpdate update = new LiveVoteUpdate(
                 session.getId(),
                 groupId,
@@ -72,6 +75,7 @@ public class VoteNotificationService {
                 eligible,
                 session.getQuorumPercent(),
                 winner,
+                tiebreakerRouletteId,
                 Instant.now()
         );
 

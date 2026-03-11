@@ -50,13 +50,15 @@ export interface Segment {
 export interface Roulette {
   id:             string;
   groupId?:       string;
+  groupAdminId?:  string;
   creatorId:      string;
   creatorName:    string;
   name:           string;
   mode:           RouletteMode;
   status:         RouletteStatus;
-  isSurpriseMode: boolean;
-  segments:       Segment[];
+  isSurpriseMode:       boolean;
+  isTiebreakerRoulette: boolean;
+  segments:             Segment[];
   createdAt:      string;
 }
 
@@ -115,15 +117,16 @@ export interface VoteOption {
 }
 
 export interface VoteSession {
-  id:             string;
-  groupId:        string;
-  rouletteId?:    string;
-  mode:           VoteMode;
-  status:         VoteStatus;
-  quorumPercent:  number;
-  timeoutAt?:     string;
-  options:        VoteOption[];
-  createdAt:      string;
+  id:                     string;
+  groupId:                string;
+  rouletteId?:            string;
+  tiebreakerRouletteId?:  string;
+  mode:                   VoteMode;
+  status:                 VoteStatus;
+  quorumPercent:          number;
+  timeoutAt?:             string;
+  options:                VoteOption[];
+  createdAt:              string;
 }
 
 export interface OptionResult {
@@ -149,6 +152,7 @@ export interface LiveVoteUpdate {
     wasTiebroken:           boolean;
     tiebreakerServerAngle?: number;
   } | null;
+  tiebreakerRouletteId?: string;
   updatedAt: string;
 }
 

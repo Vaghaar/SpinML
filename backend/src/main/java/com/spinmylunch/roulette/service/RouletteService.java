@@ -260,10 +260,12 @@ public class RouletteService {
 
         Roulette roulette = findWithSegments(rouletteId);
 
-        // Pour les roulettes de groupe : seul le créateur peut lancer le spin
+        // Pour les roulettes de groupe : créateur ou admin (sauf départage → tout membre)
         if (roulette.getGroup() != null) {
-            if (!roulette.getCreator().getId().equals(user.getId())) {
-                throw AppException.of(ErrorCode.FORBIDDEN, "Seul le créateur peut lancer la roue");
+            if (roulette.isTiebreakerRoulette()) {
+                requireReadAccess(roulette, user);  // tout membre du groupe peut lancer
+            } else {
+                requireWriteAccess(roulette, user); // créateur ou admin uniquement
             }
         } else {
             requireReadAccess(roulette, user);
@@ -440,12 +442,14 @@ public class RouletteService {
         return new RouletteResponse(
                 r.getId(),
                 r.getGroup() != null ? r.getGroup().getId() : null,
+                r.getGroup() != null ? r.getGroup().getAdmin().getId() : null,
                 r.getCreator().getId(),
                 r.getCreator().getName(),
                 r.getName(),
                 r.getMode(),
                 r.getStatus(),
                 r.isSurpriseMode(),
+                r.isTiebreakerRoulette(),
                 segs,
                 r.getCreatedAt()
         );

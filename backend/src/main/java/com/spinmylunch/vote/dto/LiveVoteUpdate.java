@@ -25,8 +25,14 @@ public record LiveVoteUpdate(
         int  totalEligibleVoters,   // membres du groupe
         int  quorumPercent,
 
-        /** Gagnant final — renseigné uniquement quand status == CLOSED */
+        /** Gagnant final — renseigné uniquement quand status == CLOSED et pas d'égalité */
         TiebreakerResult winner,
+
+        /**
+         * Roulette de départage — renseignée quand status == CLOSED et égalité.
+         * Le frontend doit proposer de lancer cette roue.
+         */
+        UUID tiebreakerRouletteId,
 
         @JsonFormat(shape = JsonFormat.Shape.STRING)
         Instant updatedAt

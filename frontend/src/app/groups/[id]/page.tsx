@@ -36,6 +36,10 @@ export default function GroupPage() {
   const { user, isAuthenticated, isLoading: authLoading } = useAuth();
   const queryClient = useQueryClient();
 
+  useEffect(() => {
+    if (!authLoading && !isAuthenticated) router.replace('/');
+  }, [authLoading, isAuthenticated, router]);
+
   const [tab, setTab]                   = useState<Tab>('votes');
   const [showCreateVote, setShowCreate] = useState(false);
   const [showCreateRoulette, setShowCreateRoulette] = useState(false);
@@ -167,7 +171,8 @@ export default function GroupPage() {
 
   useEffect(() => {
     if (!group?.inviteCode) return;
-    QRCode.toDataURL(group.inviteCode, {
+    const joinUrl = `${window.location.origin}/join?code=${group.inviteCode}`;
+    QRCode.toDataURL(joinUrl, {
       width: 200, margin: 2,
       color: { dark: '#e2e8f0', light: '#0f172a' },
     }).then(setQrDataUrl).catch(() => {});
@@ -349,21 +354,29 @@ export default function GroupPage() {
                 )}
 
                 {/* Historique */}
-                {closedSessions.length > 0 && (
-                  <details className="group/hist">
-                    <summary className="flex items-center gap-2 text-xs text-slate-500 uppercase tracking-wider cursor-pointer hover:text-slate-400 transition-colors select-none py-2">
-                      <span className="group-open/hist:rotate-90 transition-transform inline-block">▶</span>
-                      Historique ({closedSessions.length})
-                    </summary>
-                    <div className="flex flex-col gap-3 mt-3">
-                      {closedSessions.map(s => (
-                        <VoteSessionCard key={s.id} session={s}
-                          liveUpdate={liveUpdates[s.id]}
-                          currentUserId={user?.id} isAdmin={isAdmin} />
-                      ))}
-                    </div>
-                  </details>
-                )}
+                {closedSessions.length > 0 && (() => {
+                  const hasTiebreaker = closedSessions.some(
+                    s => liveUpdates[s.id]?.tiebreakerRouletteId ?? s.tiebreakerRouletteId
+                  );
+                  return (
+                    <details className="group/hist" open={hasTiebreaker}>
+                      <summary className="flex items-center gap-2 text-xs text-slate-500 uppercase tracking-wider cursor-pointer hover:text-slate-400 transition-colors select-none py-2">
+                        <span className="group-open/hist:rotate-90 transition-transform inline-block">▶</span>
+                        Historique ({closedSessions.length})
+                        {hasTiebreaker && (
+                          <span className="text-primary-400">· Départage en attente !</span>
+                        )}
+                      </summary>
+                      <div className="flex flex-col gap-3 mt-3">
+                        {closedSessions.map(s => (
+                          <VoteSessionCard key={s.id} session={s}
+                            liveUpdate={liveUpdates[s.id]}
+                            currentUserId={user?.id} isAdmin={isAdmin} />
+                        ))}
+                      </div>
+                    </details>
+                  );
+                })()}
               </>
             )}
           </div>

@@ -22,6 +22,7 @@ interface RouletteWheelProps {
   phase: SpinPhase;
   winningSegmentId?: string;
   size?: number;          // canvas CSS size (square, default 340)
+  isSurpriseMode?: boolean;
 }
 
 export function RouletteWheel({
@@ -30,6 +31,7 @@ export function RouletteWheel({
   phase,
   winningSegmentId,
   size = 340,
+  isSurpriseMode = false,
 }: RouletteWheelProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
@@ -71,13 +73,13 @@ export function RouletteWheel({
     for (let pass = 0; pass < blurPasses; pass++) {
       const passOffset = isMoving ? ((pass - 1) * 0.018) : 0;
       ctx.globalAlpha  = pass === blurPasses - 1 ? blurAlpha : 0.2;
-      drawSegments(ctx, cx, cy, r, segments, totalWeight, angleRad + passOffset, phase, winningSegmentId);
+      drawSegments(ctx, cx, cy, r, segments, totalWeight, angleRad + passOffset, phase, winningSegmentId, isSurpriseMode);
     }
     ctx.globalAlpha = 1;
 
     drawPointer(ctx, cx, r);
     drawHub(ctx, cx, cy, phase);
-  }, [segments, currentAngle, phase, winningSegmentId]);
+  }, [segments, currentAngle, phase, winningSegmentId, isSurpriseMode]);
 
   // Redraw whenever props change
   useEffect(() => {
@@ -106,7 +108,11 @@ function drawSegments(
   rotationRad: number,
   phase: SpinPhase,
   winningSegmentId?: string,
+  isSurpriseMode = false,
 ) {
+  // In surprise mode, hide labels until the result is revealed
+  const hideLabels = isSurpriseMode && phase !== 'result';
+
   let startAngle = -Math.PI / 2 + rotationRad; // start at top
 
   segments.forEach((seg, i) => {
@@ -131,6 +137,9 @@ function drawSegments(
       grad.addColorStop(0.5, color + 'EE');
       grad.addColorStop(1, color + 'BB');
       ctx.fillStyle = grad;
+    } else if (hideLabels) {
+      // Surprise mode: muted, uniform look so no segment is identifiable
+      ctx.fillStyle = '#2D3748CC';
     } else {
       ctx.fillStyle = color + (phase === 'result' && winningSegmentId ? '88' : 'EE');
     }
@@ -141,8 +150,13 @@ function drawSegments(
     ctx.lineWidth   = 1.5;
     ctx.stroke();
 
-    // Label
-    drawSegmentLabel(ctx, cx, cy, r, midAngle, seg.label, sliceAngle, isWinner);
+    // Label — hidden in surprise mode until result
+    if (!hideLabels) {
+      drawSegmentLabel(ctx, cx, cy, r, midAngle, seg.label, sliceAngle, isWinner);
+    } else {
+      // Draw a question mark instead
+      drawSegmentLabel(ctx, cx, cy, r, midAngle, '?', sliceAngle, false);
+    }
 
     startAngle = endAngle;
   });

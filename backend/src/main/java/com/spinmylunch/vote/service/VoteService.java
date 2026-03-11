@@ -9,12 +9,12 @@ import com.spinmylunch.domain.group.GroupRepository;
 import com.spinmylunch.domain.roulette.Roulette;
 import com.spinmylunch.domain.roulette.RouletteMode;
 import com.spinmylunch.domain.roulette.RouletteRepository;
+import com.spinmylunch.domain.roulette.RouletteStatus;
 import com.spinmylunch.domain.roulette.Segment;
+import com.spinmylunch.domain.roulette.SegmentRepository;
 import com.spinmylunch.domain.user.User;
-import com.spinmylunch.domain.user.UserRepository;
 import com.spinmylunch.domain.vote.*;
 import com.spinmylunch.gamification.service.GamificationService;
-import com.spinmylunch.roulette.service.SpinService;
 import com.spinmylunch.vote.dto.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -25,7 +25,6 @@ import org.springframework.transaction.annotation.Transactional;
 import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.*;
-import java.util.stream.IntStream;
 
 @Slf4j
 @Service
@@ -38,11 +37,15 @@ public class VoteService {
     private final GroupRepository         groupRepository;
     private final GroupMemberRepository   groupMemberRepository;
     private final RouletteRepository      rouletteRepository;
-    private final UserRepository          userRepository;
-    private final SpinService             spinService;
+    private final SegmentRepository       segmentRepository;
     private final GamificationService     gamificationService;
     private final VoteNotificationService notificationService;
     private final RateLimitService        rateLimitService;
+
+    private static final String[] TIEBREAKER_COLORS = {
+        "#FF6B35","#FFD700","#7C3AED","#06B6D4",
+        "#10B981","#F59E0B","#EF4444","#8B5CF6",
+    };
 
     // ─── Créer une session de vote ────────────────────────────────────────────
 
@@ -222,7 +225,6 @@ public class VoteService {
 
     private LiveVoteUpdate closeAndAnnounceWinner(VoteSession session) {
         session.setStatus(VoteStatus.CLOSED);
-        voteSessionRepository.save(session);
 
         List<Vote> votes = voteRepository.findBySessionId(session.getId());
         List<VoteOption> tied = notificationService.findTiedOptions(session, votes);
@@ -239,50 +241,51 @@ public class VoteService {
                     tied.get(0).getId(), tied.get(0).getLabel(), false, null);
 
         } else {
-            // Ex-aequo → mini-spin automatique entre les options à égalité
-            winner = resolveTieWithSpin(tied);
-            log.info("Tiebreaker déclenché entre {} options pour session {}",
-                    tied.size(), session.getId());
+            // Ex-aequo → créer une roulette de départage que le groupe peut lancer
+            winner = null;
+            Roulette tiebreakerRoulette = createTiebreakerRoulette(session, tied);
+            session.setTiebreakerRoulette(tiebreakerRoulette);
+            log.info("Roulette de départage créée {} pour session {} ({} options ex-aequo)",
+                    tiebreakerRoulette.getId(), session.getId(), tied.size());
         }
 
+        voteSessionRepository.save(session);
         notificationService.broadcastVoteUpdate(session, winner);
         return buildLiveUpdate(session, winner);
     }
 
     /**
-     * Mini-spin automatique entre les options ex-aequo.
-     * Crée des Segments temporaires (non persistés) depuis les VoteOptions.
+     * Crée et persiste une roulette de départage avec les options ex-aequo comme segments.
      */
-    private LiveVoteUpdate.TiebreakerResult resolveTieWithSpin(List<VoteOption> tied) {
-        // Créer des segments éphémères pour le spin (pondération égale)
-        List<Segment> tempSegments = IntStream.range(0, tied.size())
-                .mapToObj(i -> {
-                    Segment s = new Segment();
-                    s.setId(tied.get(i).getId()); // ID = ID de l'option pour mapping retour
-                    s.setLabel(tied.get(i).getLabel());
-                    s.setPosition(i);
-                    java.math.BigDecimal one = java.math.BigDecimal.ONE;
-                    s.setWeight(one);
-                    s.setColor("#FF6B35");
-                    return s;
-                })
-                .toList();
-
-        SpinService.SpinResult spinResult = spinService.computeSpin(tempSegments, RouletteMode.EQUAL);
-        Segment winnerSeg = spinResult.winner();
-
-        // Retrouver l'option correspondante (ID = option ID)
-        VoteOption winnerOption = tied.stream()
-                .filter(o -> o.getId().equals(winnerSeg.getId()))
-                .findFirst()
-                .orElse(tied.get(0));
-
-        return new LiveVoteUpdate.TiebreakerResult(
-                winnerOption.getId(),
-                winnerOption.getLabel(),
-                true,
-                spinResult.serverAngle()
+    private Roulette createTiebreakerRoulette(VoteSession session, List<VoteOption> tied) {
+        Roulette roulette = rouletteRepository.save(
+                Roulette.builder()
+                        .group(session.getGroup())
+                        .creator(session.getGroup().getAdmin())
+                        .name("Départage — " + tied.stream()
+                                .map(VoteOption::getLabel)
+                                .reduce((a, b) -> a + " vs " + b)
+                                .orElse("Vote"))
+                        .mode(RouletteMode.EQUAL)
+                        .status(RouletteStatus.ACTIVE)
+                        .isSurpriseMode(false)
+                        .isTiebreakerRoulette(true)
+                        .build()
         );
+
+        for (int i = 0; i < tied.size(); i++) {
+            segmentRepository.save(
+                    Segment.builder()
+                            .roulette(roulette)
+                            .label(tied.get(i).getLabel())
+                            .weight(BigDecimal.ONE)
+                            .color(TIEBREAKER_COLORS[i % TIEBREAKER_COLORS.length])
+                            .position(i)
+                            .build()
+            );
+        }
+
+        return roulette;
     }
 
     // ─── Validation vote ─────────────────────────────────────────────────────
@@ -360,6 +363,9 @@ public class VoteService {
         List<LiveVoteUpdate.OptionResult> results =
                 notificationService.computeOptionResults(session.getOptions(), votes, session.getMode());
 
+        UUID tiebreakerRouletteId = session.getTiebreakerRoulette() != null
+                ? session.getTiebreakerRoulette().getId() : null;
+
         return new LiveVoteUpdate(
                 session.getId(),
                 session.getGroup().getId(),
@@ -370,6 +376,7 @@ public class VoteService {
                 eligible,
                 session.getQuorumPercent(),
                 winner,
+                tiebreakerRouletteId,
                 Instant.now()
         );
     }
@@ -385,6 +392,7 @@ public class VoteService {
                 session.getId(),
                 session.getGroup().getId(),
                 session.getRoulette() != null ? session.getRoulette().getId() : null,
+                session.getTiebreakerRoulette() != null ? session.getTiebreakerRoulette().getId() : null,
                 session.getMode(),
                 session.getStatus(),
                 session.getQuorumPercent(),

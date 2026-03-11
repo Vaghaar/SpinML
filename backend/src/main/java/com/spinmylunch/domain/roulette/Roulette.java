@@ -48,6 +48,11 @@ public class Roulette {
     @Builder.Default
     private RouletteStatus status = RouletteStatus.ACTIVE;
 
+    /** Roulette générée automatiquement pour départager un vote ex-aequo. */
+    @Column(name = "is_tiebreaker_roulette", nullable = false)
+    @Builder.Default
+    private boolean isTiebreakerRoulette = false;
+
     @OneToMany(mappedBy = "roulette", cascade = CascadeType.ALL,
                orphanRemoval = true, fetch = FetchType.LAZY)
     @OrderBy("position ASC")

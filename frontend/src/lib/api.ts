@@ -94,7 +94,6 @@ api.interceptors.response.use(
     } catch (refreshError) {
       processQueue(refreshError, null);
       useAuthStore.getState().logout();
-      if (typeof window !== 'undefined') window.location.href = '/';
       return Promise.reject(refreshError);
     } finally {
       isRefreshing = false;

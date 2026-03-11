@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useCallback } from 'react';
+import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { voteApi } from '@/lib/api';
@@ -24,14 +25,16 @@ export function VoteSessionCard({
   onClose,
 }: VoteSessionCardProps) {
   const queryClient = useQueryClient();
+  const router = useRouter();
   const [selectedOption, setSelectedOption] = useState<string | null>(null);
   const [points, setPoints]                 = useState<Record<string, number>>({});
   const [voted, setVoted]                   = useState(false);
   const [proposalInput, setProposalInput]   = useState('');
 
-  const effectiveStatus = liveUpdate?.status ?? session.status;
-  const isPending = effectiveStatus === 'PENDING';
-  const isClosed  = effectiveStatus === 'CLOSED';
+  const effectiveStatus        = liveUpdate?.status ?? session.status;
+  const isPending              = effectiveStatus === 'PENDING';
+  const isClosed               = effectiveStatus === 'CLOSED';
+  const tiebreakerRouletteId   = liveUpdate?.tiebreakerRouletteId ?? session.tiebreakerRouletteId;
 
   // Build ranked results from live update or empty
   const results: OptionResult[] = liveUpdate?.results ?? session.options.map(o => ({
@@ -256,8 +259,29 @@ export function VoteSessionCard({
           <span className="text-secondary-400">🏆</span>
           <span className="font-body text-sm text-secondary-300 font-semibold">
             {liveUpdate.winner.winningLabel}
-            {liveUpdate.winner.wasTiebroken && <span className="text-xs text-slate-400 ml-1">(ex-æquo → spin)</span>}
           </span>
+        </motion.div>
+      )}
+
+      {/* Tiebreaker roulette — ex-aequo, une roue a été générée */}
+      {isClosed && !winnerId && tiebreakerRouletteId && (
+        <motion.div
+          initial={{ opacity: 0, y: 8 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="flex flex-col gap-3 px-3 py-3 rounded-xl bg-primary-500/10 border border-primary-500/30"
+        >
+          <div className="flex items-center gap-2">
+            <span className="text-primary-400">🎡</span>
+            <span className="font-body text-sm text-primary-300 font-semibold">
+              Ex-æquo ! Une roue de départage a été créée.
+            </span>
+          </div>
+          <button
+            onClick={() => router.push(`/roulette/${tiebreakerRouletteId}`)}
+            className="w-full py-2 rounded-xl bg-primary-500 hover:bg-primary-400 text-white font-bold text-sm transition-colors"
+          >
+            Lancer la roue de départage →
+          </button>
         </motion.div>
       )}
 

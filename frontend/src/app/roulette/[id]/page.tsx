@@ -24,6 +24,11 @@ export default function RoulettePage() {
   const [lastSpinResp, setLastSpinResp] = useState<SpinResponse | null>(null);
   const [spinnerName, setSpinnerName]   = useState<string | null>(null);
 
+  // Redirect to home if auth finishes loading and user is not authenticated
+  useEffect(() => {
+    if (!authLoading && !isAuthenticated) router.replace('/');
+  }, [authLoading, isAuthenticated, router]);
+
   // Vrai uniquement si CE device a déclenché le spin (pas un autre appareil du même user)
   const spinInitiatedByMe = useRef(false);
 
@@ -42,11 +47,14 @@ export default function RoulettePage() {
       const { data } = await rouletteApi.getById(id);
       return data;
     },
-    enabled: !!id,
+    enabled: !!id && isAuthenticated,
   });
 
-  const isCreator = roulette?.creatorId === user?.id;
-  const canSpin   = roulette?.groupId ? isCreator : true;
+  const isCreator      = roulette?.creatorId === user?.id;
+  const isGroupAdmin   = !!roulette?.groupAdminId && roulette.groupAdminId === user?.id;
+  const canSpin        = roulette?.isTiebreakerRoulette
+    ? true  // tout membre du groupe peut lancer la roue de départage
+    : roulette?.groupId ? (isCreator || isGroupAdmin) : true;
 
   // ── Spin synchronisé — reçu via WebSocket depuis les autres appareils ────────
   // IMPORTANT : doit être déclaré APRÈS useQuery(roulette) pour que roulette soit défini
@@ -190,11 +198,12 @@ export default function RoulettePage() {
           phase={phase}
           winningSegmentId={phase === 'result' ? (lastSpinResp?.winningSegmentId ?? undefined) : undefined}
           size={340}
+          isSurpriseMode={roulette.isSurpriseMode}
         />
 
-        {/* Surprise mode — mask segments */}
+        {/* Surprise mode — gift box overlay on idle only (wheel handles masking while spinning) */}
         {roulette.isSurpriseMode && phase === 'idle' && (
-          <div className="absolute inset-0 rounded-full bg-dark-bg/80 flex items-center justify-center">
+          <div className="absolute inset-0 rounded-full bg-dark-bg/80 flex items-center justify-center pointer-events-none">
             <span className="text-4xl">🎁</span>
           </div>
         )}

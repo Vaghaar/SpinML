@@ -12,12 +12,14 @@ import java.util.UUID;
 public record RouletteResponse(
         UUID id,
         UUID groupId,
+        UUID groupAdminId,
         UUID creatorId,
         String creatorName,
         String name,
         RouletteMode mode,
         RouletteStatus status,
         boolean isSurpriseMode,
+        boolean isTiebreakerRoulette,
         List<SegmentResponse> segments,
 
         @JsonFormat(shape = JsonFormat.Shape.STRING)
