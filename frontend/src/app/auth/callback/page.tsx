@@ -50,8 +50,14 @@ function AuthCallbackInner() {
         login(data.accessToken, data.user);
         setCachedUser(data.user);
         toast.success(`Bienvenue, ${data.user.name.split(' ')[0]} !`);
-        // Onboarding si c'est la première fois
-        router.replace(hasOnboarded ? '/dashboard' : '/onboarding');
+        // Onboarding si c'est la première fois, sinon redirect sauvegardé ou dashboard
+        if (!hasOnboarded) {
+          router.replace('/onboarding');
+        } else {
+          const redirect = sessionStorage.getItem('redirectAfterLogin');
+          sessionStorage.removeItem('redirectAfterLogin');
+          router.replace(redirect ?? '/dashboard');
+        }
       })
       .catch(() => {
         toast.error('Échec de connexion', 'Impossible de se connecter avec Google.');

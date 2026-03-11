@@ -26,7 +26,10 @@ export default function RoulettePage() {
 
   // Redirect to home if auth finishes loading and user is not authenticated
   useEffect(() => {
-    if (!authLoading && !isAuthenticated) router.replace('/');
+    if (!authLoading && !isAuthenticated) {
+      sessionStorage.setItem('redirectAfterLogin', window.location.pathname);
+      router.replace('/');
+    }
   }, [authLoading, isAuthenticated, router]);
 
   // Vrai uniquement si CE device a déclenché le spin (pas un autre appareil du même user)

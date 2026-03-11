@@ -24,7 +24,9 @@ export default function LandingPage() {
   // Rediriger si déjà authentifié
   useEffect(() => {
     if (!isLoading && isAuthenticated) {
-      router.replace('/dashboard');
+      const redirect = sessionStorage.getItem('redirectAfterLogin');
+      sessionStorage.removeItem('redirectAfterLogin');
+      router.replace(redirect ?? '/dashboard');
     }
   }, [isAuthenticated, isLoading, router]);
 
@@ -33,7 +35,9 @@ export default function LandingPage() {
     try {
       const { data } = await authApi.guest();
       login(data.accessToken, data.user);
-      router.replace('/dashboard');
+      const redirect = sessionStorage.getItem('redirectAfterLogin');
+      sessionStorage.removeItem('redirectAfterLogin');
+      router.replace(redirect ?? '/dashboard');
     } catch (err) {
       console.error('[guest] erreur:', err);
       toast.error('Connexion impossible', 'Le serveur est inaccessible. Vérifiez que le backend est démarré.');

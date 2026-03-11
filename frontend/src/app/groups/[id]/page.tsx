@@ -37,7 +37,10 @@ export default function GroupPage() {
   const queryClient = useQueryClient();
 
   useEffect(() => {
-    if (!authLoading && !isAuthenticated) router.replace('/');
+    if (!authLoading && !isAuthenticated) {
+      sessionStorage.setItem('redirectAfterLogin', window.location.pathname + window.location.search);
+      router.replace('/');
+    }
   }, [authLoading, isAuthenticated, router]);
 
   const [tab, setTab]                   = useState<Tab>('votes');

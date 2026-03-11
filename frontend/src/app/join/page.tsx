@@ -21,7 +21,8 @@ function JoinHandler() {
     if (attempted.current) return;
 
     if (!isAuthenticated) {
-      router.replace(`/?redirect=/join?code=${code ?? ''}`);
+      sessionStorage.setItem('redirectAfterLogin', `/join?code=${code ?? ''}`);
+      router.replace('/');
       return;
     }
 

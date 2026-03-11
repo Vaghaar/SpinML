@@ -51,7 +51,10 @@ export default function DashboardPage() {
   const [joiningGroup, setJoiningGroup]       = useState(false);
 
   useEffect(() => {
-    if (!authLoading && !isAuthenticated) router.replace('/');
+    if (!authLoading && !isAuthenticated) {
+      sessionStorage.setItem('redirectAfterLogin', window.location.pathname + window.location.search);
+      router.replace('/');
+    }
   }, [authLoading, isAuthenticated, router]);
 
   const { data: roulettes = [], isLoading: roulettesLoading } = useQuery<Roulette[]>({
