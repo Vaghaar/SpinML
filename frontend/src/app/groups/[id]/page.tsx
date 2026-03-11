@@ -211,85 +211,89 @@ export default function GroupPage() {
     <div className="min-h-dvh bg-dark-bg pb-24">
 
       {/* Top bar */}
-      <div className="sticky top-0 z-10 bg-dark-bg/80 backdrop-blur-md border-b border-white/5">
-        <div className="max-w-2xl mx-auto px-4 py-3 flex items-center gap-3">
+      <div className="sticky top-0 z-20 backdrop-blur-xl border-b border-primary-900/40"
+        style={{ background: 'linear-gradient(135deg, rgba(13,6,20,0.97), rgba(22,10,42,0.97))' }}>
+        <div className="max-w-5xl mx-auto px-4 py-3 flex items-center gap-3">
           <button onClick={() => router.back()}
-            className="text-slate-400 hover:text-white transition-colors text-lg leading-none">
-            ←
+            className="text-slate-400 hover:text-white transition-colors font-bold text-sm bg-white/5 hover:bg-white/10 px-3 py-1.5 rounded-full">
+            ← Retour
           </button>
-          <span className="font-title font-bold text-white truncate flex-1">{group.name}</span>
-          <span className="text-xs text-slate-500 bg-white/5 px-2 py-1 rounded-full shrink-0">
-            {members.length} membre{members.length !== 1 ? 's' : ''}
+          <span className="font-title font-black text-white truncate flex-1 text-lg">{group.name}</span>
+          <span className="text-xs font-bold text-slate-400 bg-primary-500/10 px-2.5 py-1 rounded-full shrink-0 border border-primary-500/20">
+            👥 {members.length} membre{members.length !== 1 ? 's' : ''}
           </span>
         </div>
       </div>
 
       {/* Hero invite card */}
-      <div className="relative bg-gradient-to-br from-accent-600/20 via-primary-600/10 to-transparent">
-        <div className="max-w-2xl mx-auto px-4 py-6">
+      <div className="relative">
+        <div className="max-w-5xl mx-auto px-4 py-5">
           <motion.div initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }}
-            className="glass rounded-2xl p-5 flex items-center gap-5">
+            className="card-hero rounded-3xl p-5 sm:p-6 relative overflow-hidden">
+            <div className="absolute -top-8 -right-8 w-40 h-40 bg-primary-500/15 rounded-full blur-2xl pointer-events-none" />
 
-            {/* QR */}
-            <div className="shrink-0 flex flex-col items-center gap-1.5">
-              {qrDataUrl
-                ? <img src={qrDataUrl} alt="QR invitation" className="w-24 h-24 rounded-xl" />
-                : <div className="w-24 h-24 rounded-xl bg-white/5 animate-pulse" />
-              }
-              <span className="text-[10px] text-slate-600">Scanner pour rejoindre</span>
-            </div>
+            <div className="flex flex-col sm:flex-row sm:items-center gap-5">
+              {/* QR */}
+              <div className="shrink-0 flex flex-col items-center gap-1.5">
+                {qrDataUrl
+                  ? <img src={qrDataUrl} alt="QR invitation" className="w-24 h-24 rounded-2xl border border-white/10" />
+                  : <div className="w-24 h-24 rounded-2xl bg-white/5 animate-pulse" />
+                }
+                <span className="text-[10px] text-slate-600 font-bold">Scanner pour rejoindre</span>
+              </div>
 
-            {/* Code + actions */}
-            <div className="flex flex-col gap-2 min-w-0 flex-1">
-              <p className="text-xs text-slate-400 uppercase tracking-wider">Code d'invitation</p>
-              <p className="font-mono font-black text-3xl text-white tracking-[0.2em] leading-none">
-                {group.inviteCode}
-              </p>
-              <div className="flex gap-2 mt-1">
+              {/* Code */}
+              <div className="flex flex-col gap-2 min-w-0 flex-1">
+                <p className="text-xs font-black text-slate-400 uppercase tracking-widest">Code d'invitation</p>
+                <p className="font-mono font-black text-3xl sm:text-4xl text-white tracking-[0.25em] leading-none">
+                  {group.inviteCode}
+                </p>
                 <button
                   onClick={() => {
                     navigator.clipboard.writeText(group.inviteCode);
                     setCopiedCode(true);
                     setTimeout(() => setCopiedCode(false), 2000);
                   }}
-                  className="text-xs bg-white/5 hover:bg-white/10 text-slate-300 px-3 py-1.5 rounded-lg transition-colors font-mono"
+                  className="self-start text-xs font-black bg-white/8 hover:bg-white/15 text-slate-200 px-4 py-2 rounded-full transition-all border border-white/10"
                 >
-                  {copiedCode ? '✓ Copié' : '📋 Copier'}
+                  {copiedCode ? '✓ Copié !' : '📋 Copier le code'}
                 </button>
               </div>
-            </div>
 
-            {/* Mini stats verticales */}
-            <div className="shrink-0 flex flex-col gap-2 text-right">
-              <div>
-                <p className="font-title font-black text-white text-xl leading-none">{openCount}</p>
-                <p className="text-[10px] text-slate-500">votes ouverts</p>
-              </div>
-              <div>
-                <p className="font-title font-black text-white text-xl leading-none">{stats?.totalSpins ?? '—'}</p>
-                <p className="text-[10px] text-slate-500">spins</p>
+              {/* Stats rapides */}
+              <div className="flex sm:flex-col gap-4 sm:gap-3 sm:shrink-0 sm:text-right border-t sm:border-t-0 sm:border-l border-white/10 pt-4 sm:pt-0 sm:pl-6">
+                {[
+                  { v: openCount,              l: 'votes ouverts', i: '🗳️' },
+                  { v: stats?.totalSpins ?? '—', l: 'spins totaux', i: '🎡' },
+                  { v: members.length,          l: 'membres',       i: '👥' },
+                ].map(s => (
+                  <div key={s.l}>
+                    <p className="font-title font-black text-white text-2xl leading-none">{s.v}</p>
+                    <p className="text-[10px] text-slate-500 font-bold">{s.i} {s.l}</p>
+                  </div>
+                ))}
               </div>
             </div>
-
           </motion.div>
         </div>
       </div>
 
       {/* Tabs */}
-      <div className="sticky top-[53px] z-10 bg-dark-bg/90 backdrop-blur-md border-b border-white/5">
-        <div className="max-w-2xl mx-auto px-4">
-          <div className="flex">
+      <div className="sticky top-[57px] z-10 border-b border-primary-900/30"
+        style={{ background: 'rgba(13,6,20,0.92)', backdropFilter: 'blur(20px)' }}>
+        <div className="max-w-5xl mx-auto px-4">
+          <div className="flex overflow-x-auto scrollbar-none">
             {TABS.map(t => (
               <button key={t.id} onClick={() => setTab(t.id)}
-                className={`flex-1 flex items-center justify-center gap-1.5 py-3.5 text-sm font-semibold border-b-2 transition-all ${
+                className={`flex-1 sm:flex-none flex items-center justify-center gap-1.5 py-3.5 px-3 sm:px-6 text-sm font-black border-b-2 transition-all whitespace-nowrap ${
                   tab === t.id
-                    ? 'border-primary-500 text-primary-400'
+                    ? 'border-primary-400 text-primary-300'
                     : 'border-transparent text-slate-500 hover:text-slate-300'
                 }`}>
                 <span>{t.icon}</span>
-                <span>{t.label}</span>
+                <span className="text-xs sm:text-sm">{t.label}</span>
                 {t.id === 'votes' && openCount > 0 && (
-                  <span className="w-4 h-4 rounded-full bg-primary-500 text-white text-[10px] font-bold flex items-center justify-center">
+                  <span className="w-4 h-4 rounded-full bg-red-500 text-white text-[9px] font-black flex items-center justify-center animate-pulse">
                     {openCount}
                   </span>
                 )}
@@ -299,26 +303,26 @@ export default function GroupPage() {
         </div>
       </div>
 
-      <div className="max-w-2xl mx-auto px-4 pt-6">
+      <div className="max-w-5xl mx-auto px-4 pt-6">
 
         {/* ── Onglet Votes ───────────────────────────────────────────────── */}
         {tab === 'votes' && (
           <div className="flex flex-col gap-4">
-            <div className="flex items-center justify-between">
-              <h2 className="font-title font-bold text-white">Votes</h2>
+            <div className="flex items-center justify-between flex-wrap gap-2">
+              <h2 className="font-title font-black text-white text-lg">🗳️ Votes</h2>
               <button onClick={() => setShowCreate(true)}
-                className="text-sm bg-primary-500/20 hover:bg-primary-500/30 text-primary-400 px-3 py-1.5 rounded-xl transition-colors font-semibold">
+                className="text-sm font-black bg-primary-600 hover:bg-primary-500 text-white px-4 py-2 rounded-full shadow-btn-primary transition-all active:scale-95">
                 + Nouveau vote
               </button>
             </div>
 
             {sessions.length === 0 ? (
-              <div className="glass rounded-2xl p-10 text-center flex flex-col items-center gap-3">
+              <div className="glass rounded-3xl p-12 text-center flex flex-col items-center gap-3 border-2 border-dashed border-white/10">
                 <span className="text-5xl">🗳️</span>
-                <p className="text-slate-300 font-semibold">Aucun vote en cours</p>
-                <p className="text-slate-500 text-sm">Créez un vote pour choisir quoi manger ensemble.</p>
+                <p className="text-slate-200 font-black text-lg">Aucun vote en cours</p>
+                <p className="text-slate-500 text-sm font-semibold">Créez un vote pour choisir quoi manger ensemble.</p>
                 <button onClick={() => setShowCreate(true)}
-                  className="mt-2 px-5 py-2.5 rounded-xl bg-primary-500/20 hover:bg-primary-500/30 text-primary-400 font-bold text-sm transition-colors">
+                  className="mt-2 px-5 py-2.5 rounded-full bg-primary-600 hover:bg-primary-500 text-white font-black text-sm transition-all shadow-btn-primary">
                   Créer le premier vote
                 </button>
               </div>
@@ -388,25 +392,25 @@ export default function GroupPage() {
         {/* ── Onglet Roulettes ────────────────────────────────────────────── */}
         {tab === 'roulettes' && (
           <div className="flex flex-col gap-4">
-            <div className="flex items-center justify-between">
-              <h2 className="font-title font-bold text-white">Roulettes du groupe</h2>
+            <div className="flex items-center justify-between flex-wrap gap-2">
+              <h2 className="font-title font-black text-white text-lg">🎡 Roulettes du groupe</h2>
               <button onClick={() => setShowCreateRoulette(true)}
-                className="text-sm bg-primary-500/20 hover:bg-primary-500/30 text-primary-400 px-3 py-1.5 rounded-xl transition-colors font-semibold">
+                className="text-sm font-black bg-accent-500 hover:bg-accent-400 text-white px-4 py-2 rounded-full shadow-btn-accent transition-all active:scale-95">
                 + Nouvelle roulette
               </button>
             </div>
             {roulettes.length === 0 ? (
-              <div className="glass rounded-2xl p-10 text-center flex flex-col items-center gap-3">
+              <div className="glass rounded-3xl p-12 text-center flex flex-col items-center gap-3 border-2 border-dashed border-white/10">
                 <span className="text-5xl">🎡</span>
-                <p className="text-slate-300 font-semibold">Aucune roulette dans ce groupe</p>
-                <p className="text-slate-500 text-sm">Créez une roulette partagée pour choisir quoi manger.</p>
+                <p className="text-slate-200 font-black text-lg">Aucune roulette dans ce groupe</p>
+                <p className="text-slate-500 text-sm font-semibold">Créez une roulette partagée pour choisir quoi manger.</p>
                 <button onClick={() => setShowCreateRoulette(true)}
-                  className="mt-2 px-5 py-2.5 rounded-xl bg-primary-500/20 hover:bg-primary-500/30 text-primary-400 font-bold text-sm transition-colors">
+                  className="mt-2 px-5 py-2.5 rounded-full bg-accent-500 hover:bg-accent-400 text-white font-black text-sm transition-all shadow-btn-accent">
                   Créer la première roulette
                 </button>
               </div>
             ) : (
-              <div className="flex flex-col gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 {roulettes.map((r, i) => (
                   <GroupRouletteCard
                     key={r.id}
@@ -426,11 +430,12 @@ export default function GroupPage() {
           <div className="flex flex-col gap-4">
 
             {/* KPI row */}
-            <div className="grid grid-cols-3 gap-3">
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
               {[
-                { icon: '🎡', value: stats?.totalSpins ?? '—',     label: 'Spins totaux'     },
-                { icon: '🗳️', value: sessions.length,              label: 'Sessions de vote'  },
-                { icon: '👥', value: members.length,               label: 'Membres'           },
+                { icon: '🎡', value: stats?.totalSpins ?? '—', label: 'Spins totaux'    },
+                { icon: '🗳️', value: sessions.length,           label: 'Sessions vote'  },
+                { icon: '👥', value: members.length,            label: 'Membres'        },
+                { icon: '🏆', value: closedSessions.length,     label: 'Votes terminés' },
               ].map((kpi, i) => (
                 <motion.div key={kpi.label}
                   initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }}
@@ -438,7 +443,7 @@ export default function GroupPage() {
                   className="glass rounded-2xl p-4 text-center flex flex-col gap-1">
                   <span className="text-2xl">{kpi.icon}</span>
                   <p className="font-title font-black text-white text-2xl leading-none">{kpi.value}</p>
-                  <p className="text-[11px] text-slate-500">{kpi.label}</p>
+                  <p className="text-[11px] text-slate-500 font-bold">{kpi.label}</p>
                 </motion.div>
               ))}
             </div>
@@ -484,45 +489,50 @@ export default function GroupPage() {
 
         {/* ── Onglet Membres ──────────────────────────────────────────────── */}
         {tab === 'membres' && (
-          <div className="flex flex-col gap-3">
-            <p className="text-xs text-slate-500 uppercase tracking-wider">
-              {members.length} membre{members.length !== 1 ? 's' : ''}
-            </p>
+          <div className="flex flex-col gap-4">
+            <div className="flex items-center justify-between flex-wrap gap-2">
+              <h2 className="font-title font-black text-white text-lg">👥 Membres</h2>
+              <span className="text-xs font-bold text-slate-400 bg-white/5 px-2.5 py-1 rounded-full">
+                {members.length} membre{members.length !== 1 ? 's' : ''}
+              </span>
+            </div>
 
             {isAdmin && (
               <button
                 onClick={handleDeleteGroup}
                 disabled={deleteGroupMutation.isPending}
-                className="flex items-center gap-2 text-sm text-red-400 hover:text-red-300 bg-red-500/10 hover:bg-red-500/15 border border-red-500/20 px-4 py-2.5 rounded-xl transition-colors disabled:opacity-40 self-start"
+                className="flex items-center gap-2 text-sm font-black text-red-400 hover:text-red-300 bg-red-500/10 hover:bg-red-500/15 border border-red-500/20 px-4 py-2.5 rounded-full transition-all disabled:opacity-40 self-start"
               >
                 🗑 {deleteGroupMutation.isPending ? 'Suppression…' : 'Supprimer le groupe'}
               </button>
             )}
 
-            {members.map((m, i) => (
-              <motion.div key={m.id}
-                initial={{ opacity: 0, x: -8 }} animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: i * 0.04 }}
-                className="glass rounded-xl px-4 py-3 flex items-center gap-3">
-                {m.pictureUrl
-                  ? <img src={m.pictureUrl} alt="" className="w-10 h-10 rounded-full ring-2 ring-white/10" />
-                  : <div className="w-10 h-10 rounded-full bg-gradient-to-br from-primary-500/30 to-secondary-500/30 flex items-center justify-center text-base font-bold text-white">
-                      {m.name.charAt(0).toUpperCase()}
-                    </div>
-                }
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm font-semibold text-white truncate">{m.name}</p>
-                  <p className="text-xs text-slate-500">
-                    Membre depuis {new Date(m.joinedAt).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' })}
-                  </p>
-                </div>
-                {m.role === 'ADMIN' && (
-                  <span className="text-xs text-accent-400 font-bold px-2 py-0.5 rounded-full bg-accent-500/10 border border-accent-500/20">
-                    Admin
-                  </span>
-                )}
-              </motion.div>
-            ))}
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2">
+              {members.map((m, i) => (
+                <motion.div key={m.id}
+                  initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }}
+                  transition={{ delay: i * 0.04 }}
+                  className="glass rounded-2xl px-4 py-3.5 flex items-center gap-3">
+                  {m.pictureUrl
+                    ? <img src={m.pictureUrl} alt="" className="w-11 h-11 rounded-xl ring-2 ring-primary-500/20 shrink-0" />
+                    : <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-primary-500/30 to-accent-500/20 border border-primary-500/20 flex items-center justify-center font-black text-white shrink-0">
+                        {m.name.charAt(0).toUpperCase()}
+                      </div>
+                  }
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-black text-white truncate">{m.name}</p>
+                    <p className="text-xs text-slate-500 font-semibold">
+                      Depuis {new Date(m.joinedAt).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' })}
+                    </p>
+                  </div>
+                  {m.role === 'ADMIN' && (
+                    <span className="text-xs font-black text-primary-300 px-2 py-0.5 rounded-full bg-primary-500/15 border border-primary-500/25 shrink-0">
+                      Admin
+                    </span>
+                  )}
+                </motion.div>
+              ))}
+            </div>
           </div>
         )}
 
