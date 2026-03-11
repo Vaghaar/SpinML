@@ -176,14 +176,14 @@ export default function RoulettePage() {
       >
         <button
           onClick={() => router.push('/dashboard')}
-          className="text-slate-400 hover:text-white transition-colors text-sm"
+          className="text-slate-400 hover:text-white transition-colors text-sm font-bold bg-white/5 hover:bg-white/10 px-3 py-1.5 rounded-full"
         >
           ← Retour
         </button>
-        <h1 className="font-title font-bold text-white text-lg truncate max-w-[60%]">
+        <h1 className="font-title font-black text-white text-lg truncate max-w-[60%]">
           {roulette.name}
         </h1>
-        <span className="text-xs text-slate-500 capitalize">
+        <span className="text-xs font-bold text-primary-300 bg-primary-500/10 px-2.5 py-1 rounded-full capitalize">
           {roulette.mode.toLowerCase()}
         </span>
       </motion.header>
@@ -232,7 +232,7 @@ export default function RoulettePage() {
           disabled={(spinMutation.isPending && !isSpinning) || !canSpin}
         />
         {!canSpin && (
-          <p className="mt-2 text-xs text-slate-500 text-center">
+          <p className="mt-3 text-xs font-bold text-slate-500 text-center bg-white/5 px-4 py-2 rounded-full">
             Seul le créateur ou un admin peut lancer la roue
           </p>
         )}
@@ -271,7 +271,7 @@ export default function RoulettePage() {
           </div>
         ) : (
           <>
-            <h2 className="font-title text-sm text-slate-400 mb-3 uppercase tracking-widest">
+            <h2 className="font-title font-black text-slate-400 text-xs mb-3 uppercase tracking-widest">
               Segments ({roulette.segments.length})
             </h2>
             <div className="flex flex-col gap-2">
@@ -308,8 +308,8 @@ function SegmentRow({ segment, index, isWinner }: {
     <motion.div
       animate={isWinner ? { scale: [1, 1.04, 1] } : {}}
       transition={{ duration: 0.4, repeat: isWinner ? 2 : 0 }}
-      className={`flex items-center gap-3 glass rounded-xl px-4 py-2.5 transition-colors ${
-        isWinner ? 'border border-primary-500/60 bg-primary-500/10' : ''
+      className={`flex items-center gap-3 glass rounded-2xl px-4 py-2.5 transition-all ${
+        isWinner ? 'border-2 border-primary-500/70 bg-primary-500/10 shadow-glow-primary' : ''
       }`}
     >
       <span

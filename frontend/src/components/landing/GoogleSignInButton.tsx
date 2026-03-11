@@ -31,18 +31,18 @@ export function GoogleSignInButton({
         'transition-all duration-300 active:scale-95',
         'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500',
         'disabled:opacity-70 disabled:cursor-not-allowed',
-        // Fond glassmorphism avec bordure primaire
-        'bg-white/5 border border-white/20 text-white',
-        'hover:bg-white/10 hover:border-primary-500/60',
-        'hover:shadow-glow-primary',
+        // Style pill blanc / semi-transparent
+        'bg-white text-gray-800 border border-white/80',
+        'hover:bg-white/90 hover:shadow-[0_0_30px_rgba(255,255,255,0.25)]',
         // Tailles
-        size === 'lg' ? 'h-14 px-8 text-lg'  : 'h-11 px-6 text-base',
+        size === 'lg' ? 'h-14 px-8 text-lg font-black'  : 'h-11 px-6 text-base font-bold',
+        'rounded-full',
         className
       )}
       aria-label="Se connecter avec Google"
     >
       {isLoading ? (
-        <svg className="animate-spin h-5 w-5 text-primary-400" fill="none" viewBox="0 0 24 24">
+        <svg className="animate-spin h-5 w-5 text-gray-500" fill="none" viewBox="0 0 24 24">
           <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"/>
           <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/>
         </svg>

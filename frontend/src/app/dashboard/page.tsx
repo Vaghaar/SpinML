@@ -22,16 +22,16 @@ function XpBar({ xp, level }: { xp: number; level: number }) {
   const progress = Math.min(100, ((xp - base) / (next - base)) * 100);
   return (
     <div className="flex items-center gap-3">
-      <span className="text-xs text-slate-400 w-16 text-right">Niv.&nbsp;{level}</span>
-      <div className="flex-1 h-1.5 bg-white/10 rounded-full overflow-hidden">
+      <span className="text-xs font-bold text-primary-300 shrink-0">Niv.&nbsp;{level}</span>
+      <div className="flex-1 h-2 bg-white/10 rounded-full overflow-hidden">
         <motion.div
-          className="h-full bg-gradient-to-r from-primary-500 to-secondary-500"
+          className="h-full rounded-full bg-gradient-to-r from-primary-500 to-secondary-500"
           initial={{ width: 0 }}
           animate={{ width: `${progress}%` }}
-          transition={{ duration: 0.8, ease: 'easeOut' }}
+          transition={{ duration: 0.9, ease: 'easeOut' }}
         />
       </div>
-      <span className="text-xs text-slate-500 w-16">{xp}&nbsp;XP</span>
+      <span className="text-xs text-slate-400 shrink-0 font-bold">{xp}&nbsp;XP</span>
     </div>
   );
 }
@@ -94,7 +94,7 @@ export default function DashboardPage() {
   if (authLoading || !user) {
     return (
       <div className="min-h-dvh bg-dark-bg flex items-center justify-center">
-        <div className="w-10 h-10 rounded-full border-4 border-primary-500 border-t-transparent animate-spin" />
+        <div className="w-12 h-12 rounded-full border-4 border-primary-500 border-t-transparent animate-spin" />
       </div>
     );
   }
@@ -103,61 +103,89 @@ export default function DashboardPage() {
 
   return (
     <div className="min-h-dvh bg-dark-bg pb-24">
-      {/* Top bar */}
-      <div className="sticky top-0 z-10 bg-dark-bg/80 backdrop-blur-md border-b border-white/5">
+
+      {/* ── Top bar ──────────────────────────────────────────────────────────── */}
+      <div className="sticky top-0 z-10 backdrop-blur-xl border-b border-primary-900/40"
+        style={{ background: 'linear-gradient(135deg, rgba(13,6,20,0.96), rgba(22,10,42,0.96))' }}>
         <div className="max-w-2xl mx-auto px-4 py-3 flex items-center justify-between">
-          <span className="font-title font-bold text-primary-400 text-lg">🎡 SpinMyLunch</span>
-          <div className="flex items-center gap-3">
-            <button onClick={() => router.push('/profile')}
-              className="text-xs text-slate-400 hover:text-white transition-colors">
-              Profil
+          <span className="font-title font-black text-xl gradient-text">🎡 Spinmylunch</span>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => router.push('/profile')}
+              className="text-xs font-bold text-slate-300 hover:text-white transition-colors bg-white/8 hover:bg-white/12 px-3 py-1.5 rounded-full border border-white/10"
+            >
+              👤 Profil
             </button>
-            <button onClick={logout} className="text-xs text-slate-500 hover:text-white transition-colors">
-              Déconnexion
+            <button
+              onClick={logout}
+              className="text-xs font-bold text-slate-500 hover:text-slate-300 transition-colors px-2 py-1.5 rounded-full"
+            >
+              Déco
             </button>
           </div>
         </div>
       </div>
 
-      <div className="max-w-2xl mx-auto px-4 pt-6 flex flex-col gap-8">
+      <div className="max-w-2xl mx-auto px-4 pt-5 flex flex-col gap-6">
 
-        {/* User hero */}
-        <motion.div initial={{ opacity: 0, y: -16 }} animate={{ opacity: 1, y: 0 }}
-          className="glass rounded-2xl p-5">
-          <div className="flex items-center gap-4 mb-3">
+        {/* ── User hero card ────────────────────────────────────────────────── */}
+        <motion.div
+          initial={{ opacity: 0, y: -16 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="card-hero rounded-3xl p-5 relative overflow-hidden"
+        >
+          {/* Decorative glow */}
+          <div className="absolute -top-8 -right-8 w-40 h-40 bg-primary-500/20 rounded-full blur-2xl pointer-events-none" />
+          <div className="absolute -bottom-8 -left-4 w-32 h-32 bg-secondary-500/10 rounded-full blur-2xl pointer-events-none" />
+
+          <div className="flex items-center gap-4 mb-4 relative">
             {user.pictureUrl
-              ? <img src={user.pictureUrl} alt="" className="w-12 h-12 rounded-full ring-2 ring-primary-500/30" />
-              : <div className="w-12 h-12 rounded-full bg-primary-500/20 flex items-center justify-center text-2xl">🍕</div>
+              ? <img src={user.pictureUrl} alt="" className="w-14 h-14 rounded-2xl ring-2 ring-primary-400/50 shadow-lg" />
+              : <div className="w-14 h-14 rounded-2xl bg-primary-600/30 border border-primary-500/30 flex items-center justify-center text-2xl">🍕</div>
             }
             <div>
-              <p className="font-title font-bold text-white">Bonjour, {firstName} 👋</p>
-              <p className="text-xs text-slate-400">
-                🔥 {user.streakCount} jour{user.streakCount !== 1 ? 's' : ''} de suite
+              <p className="font-title font-black text-white text-lg leading-tight">
+                Bonjour, {firstName} 👋
               </p>
+              <div className="flex items-center gap-2 mt-1">
+                <span className="text-xs font-bold text-amber-400 bg-amber-400/10 px-2 py-0.5 rounded-full">
+                  🔥 {user.streakCount} jour{user.streakCount !== 1 ? 's' : ''}
+                </span>
+                <span className="text-xs font-bold text-primary-300 bg-primary-500/10 px-2 py-0.5 rounded-full">
+                  Niv. {user.level}
+                </span>
+              </div>
             </div>
           </div>
           <XpBar xp={user.xp} level={user.level} />
         </motion.div>
 
-        {/* Roulettes */}
+        {/* ── Roulettes ─────────────────────────────────────────────────────── */}
         <section>
           <div className="flex items-center justify-between mb-3">
-            <h2 className="font-title font-bold text-white">Mes roulettes</h2>
-            <button onClick={() => setShowCreate(true)}
-              className="text-sm bg-primary-500/20 hover:bg-primary-500/30 text-primary-400 px-3 py-1.5 rounded-xl transition-colors font-semibold">
+            <h2 className="font-title font-black text-white text-lg">🎡 Mes roulettes</h2>
+            <button
+              onClick={() => setShowCreate(true)}
+              className="flex items-center gap-1 text-sm font-black bg-accent-500 hover:bg-accent-400 text-white px-4 py-2 rounded-full shadow-btn-accent transition-all active:scale-95"
+            >
               + Créer
             </button>
           </div>
 
           {roulettesLoading ? (
             <div className="flex flex-col gap-2">
-              {[1, 2].map(i => <div key={i} className="h-20 glass rounded-2xl animate-pulse" />)}
+              {[1, 2].map(i => (
+                <div key={i} className="h-20 glass rounded-3xl animate-pulse" />
+              ))}
             </div>
           ) : roulettes.length === 0 ? (
-            <div onClick={() => setShowCreate(true)}
-              className="glass rounded-2xl p-8 text-center cursor-pointer hover:ring-1 hover:ring-primary-500/40 transition-all">
-              <div className="text-4xl mb-3">🎡</div>
-              <p className="text-slate-400 text-sm">Créez votre première roulette</p>
+            <div
+              onClick={() => setShowCreate(true)}
+              className="glass rounded-3xl p-8 text-center cursor-pointer hover:border-accent-500/40 hover:bg-accent-500/5 transition-all group border-2 border-dashed border-white/10"
+            >
+              <div className="text-5xl mb-3 group-hover:scale-110 transition-transform">🎡</div>
+              <p className="text-slate-200 font-black text-sm">Créez votre première roulette</p>
+              <p className="text-slate-500 text-xs mt-1 font-semibold">Cliquez pour commencer</p>
             </div>
           ) : (
             <div className="flex flex-col gap-2">
@@ -166,59 +194,74 @@ export default function DashboardPage() {
           )}
         </section>
 
-        {/* Groupes */}
+        {/* ── Groupes ───────────────────────────────────────────────────────── */}
         <section>
           <div className="flex items-center justify-between mb-3">
-            <h2 className="font-title font-bold text-white">Groupes</h2>
+            <h2 className="font-title font-black text-white text-lg">👥 Groupes</h2>
             <div className="flex items-center gap-2">
-              <button onClick={() => setShowCreateGroup(true)}
-                className="text-sm bg-primary-500/20 hover:bg-primary-500/30 text-primary-400 px-3 py-1.5 rounded-xl transition-colors font-semibold">
+              <button
+                onClick={() => setShowCreateGroup(true)}
+                className="text-sm font-black bg-primary-600 hover:bg-primary-500 text-white px-4 py-2 rounded-full shadow-btn-primary transition-all active:scale-95"
+              >
                 + Créer
               </button>
-              <button onClick={() => setShowJoin(s => !s)}
-                className="text-sm bg-accent-500/20 hover:bg-accent-500/30 text-accent-400 px-3 py-1.5 rounded-xl transition-colors font-semibold">
-                Rejoindre
+              <button
+                onClick={() => setShowJoin(s => !s)}
+                className="text-sm font-black bg-white/10 hover:bg-white/15 text-white px-4 py-2 rounded-full transition-all active:scale-95 border border-white/10"
+              >
+                🔗 Rejoindre
               </button>
             </div>
           </div>
 
           {showJoin && (
-            <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }}
-              className="glass rounded-2xl p-4 mb-3 flex gap-2 overflow-hidden">
+            <motion.div
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: 'auto' }}
+              className="glass rounded-2xl p-4 mb-3 flex gap-2 overflow-hidden border border-primary-500/30"
+            >
               <input
                 value={joinCode}
                 onChange={e => setJoinCode(e.target.value.toUpperCase())}
                 onKeyDown={e => e.key === 'Enter' && handleJoin()}
                 placeholder="Code d'invitation (ex: AB3DEFGH)"
                 maxLength={10}
-                className="flex-1 bg-white/5 border border-white/10 rounded-xl px-3 py-2 text-white placeholder-slate-600 focus:outline-none focus:border-accent-500 text-sm font-mono"
+                className="flex-1 bg-white/5 border border-white/10 rounded-xl px-3 py-2 text-white placeholder-slate-600 focus:outline-none focus:border-primary-500 text-sm font-mono font-bold"
               />
-              <button onClick={handleJoin} disabled={joiningGroup || joinCode.length < 4}
-                className="bg-accent-500 hover:bg-accent-400 text-white px-4 py-2 rounded-xl text-sm font-bold disabled:opacity-40 transition-colors">
-                {joiningGroup ? '…' : 'Go'}
+              <button
+                onClick={handleJoin}
+                disabled={joiningGroup || joinCode.length < 4}
+                className="bg-primary-600 hover:bg-primary-500 text-white px-5 py-2 rounded-xl text-sm font-black disabled:opacity-40 transition-colors"
+              >
+                {joiningGroup ? '…' : 'Go !'}
               </button>
             </motion.div>
           )}
 
           {groups.length === 0 ? (
-            <div className="glass rounded-2xl p-6 text-center">
-              <p className="text-slate-500 text-sm">Créez un groupe ou rejoignez-en un avec un code d'invitation</p>
+            <div className="glass rounded-3xl p-6 text-center border-2 border-dashed border-white/10">
+              <div className="text-4xl mb-2">👥</div>
+              <p className="text-slate-400 text-sm font-bold">Créez un groupe ou rejoignez-en un avec un code</p>
             </div>
           ) : (
             <div className="flex flex-col gap-2">
               {groups.map((g, i) => (
-                <GroupRow key={g.id} group={g} index={i}
+                <GroupRow
+                  key={g.id}
+                  group={g}
+                  index={i}
                   isActive={activeGroupId === g.id}
-                  onSelect={() => setActiveGroupId(prev => prev === g.id ? null : g.id)} />
+                  onSelect={() => setActiveGroupId(prev => prev === g.id ? null : g.id)}
+                />
               ))}
             </div>
           )}
         </section>
 
-        {/* Live vote sessions */}
+        {/* ── Live vote sessions ─────────────────────────────────────────────── */}
         {Object.keys(liveUpdates).length > 0 && (
           <section>
-            <h2 className="font-title font-bold text-white mb-3">Votes en cours</h2>
+            <h2 className="font-title font-black text-white text-lg mb-3">🗳️ Votes en cours</h2>
             <div className="flex flex-col gap-3">
               {Object.values(liveUpdates).map(update => (
                 <VoteSessionCard
@@ -245,10 +288,11 @@ export default function DashboardPage() {
       <CreateRouletteModal open={showCreate} onClose={() => setShowCreate(false)} />
       <CreateGroupModal open={showCreateGroup} onClose={() => setShowCreateGroup(false)} />
 
-      {/* Footer */}
-      <footer className="max-w-2xl mx-auto px-4 mt-4 text-center">
-        <button onClick={() => router.push('/legal')}
-          className="text-xs text-slate-600 hover:text-slate-400 transition-colors">
+      <footer className="max-w-2xl mx-auto px-4 mt-6 text-center">
+        <button
+          onClick={() => router.push('/legal')}
+          className="text-xs text-slate-600 hover:text-slate-400 transition-colors font-semibold"
+        >
           Mentions légales & RGPD
         </button>
       </footer>
@@ -266,20 +310,30 @@ function GroupRow({ group, index, isActive, onSelect }: {
 
   return (
     <motion.div
-      initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }}
+      initial={{ opacity: 0, y: 12 }}
+      animate={{ opacity: 1, y: 0 }}
       transition={{ delay: index * 0.05 }}
       onClick={onSelect}
-      className={`glass rounded-2xl px-4 py-3 cursor-pointer transition-all ${
-        isActive ? 'ring-1 ring-accent-500/60' : 'hover:ring-1 hover:ring-white/20'
+      className={`glass rounded-2xl px-4 py-3.5 cursor-pointer transition-all ${
+        isActive
+          ? 'ring-2 ring-primary-500/60 bg-primary-500/5'
+          : 'hover:ring-1 hover:ring-primary-500/30 hover:bg-primary-500/3'
       }`}
     >
       <div className="flex items-center justify-between">
-        <div>
-          <p className="font-title font-semibold text-white">{group.name}</p>
-          <p className="text-xs text-slate-500 font-mono mt-0.5">{group.inviteCode}</p>
+        <div className="flex items-center gap-3">
+          <div className={`w-10 h-10 rounded-xl flex items-center justify-center text-lg font-black transition-colors ${
+            isActive ? 'bg-primary-600/40 text-primary-300' : 'bg-white/8 text-slate-300'
+          }`}>
+            {group.name.charAt(0).toUpperCase()}
+          </div>
+          <div>
+            <p className="font-title font-black text-white">{group.name}</p>
+            <p className="text-xs text-slate-500 font-mono font-bold mt-0.5">{group.inviteCode}</p>
+          </div>
         </div>
         <div className="flex items-center gap-2">
-          {isActive && <span className="w-2 h-2 rounded-full bg-accent-400 animate-pulse" />}
+          {isActive && <span className="w-2 h-2 rounded-full bg-primary-400 animate-pulse" />}
           <button
             onClick={e => {
               e.stopPropagation();
@@ -287,13 +341,13 @@ function GroupRow({ group, index, isActive, onSelect }: {
               setCopied(true);
               setTimeout(() => setCopied(false), 2000);
             }}
-            className="text-xs text-slate-400 hover:text-white transition-colors px-2 py-1 rounded-lg bg-white/5"
+            className="text-xs font-bold text-slate-400 hover:text-white transition-colors px-2.5 py-1.5 rounded-lg bg-white/5 hover:bg-white/10"
           >
-            {copied ? '✓ Copié' : '📋 Code'}
+            {copied ? '✓' : '📋'}
           </button>
           <button
             onClick={e => { e.stopPropagation(); router.push(`/groups/${group.id}`); }}
-            className="text-xs text-slate-400 hover:text-white transition-colors px-2 py-1 rounded-lg bg-white/5"
+            className="text-xs font-black text-primary-300 hover:text-white transition-colors px-3 py-1.5 rounded-lg bg-primary-600/20 hover:bg-primary-600/35"
           >
             Ouvrir →
           </button>

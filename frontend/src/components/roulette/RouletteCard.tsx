@@ -13,6 +13,12 @@ const MODE_LABEL: Record<string, string> = {
   RANDOM:   'Aléatoire',
 };
 
+const MODE_COLOR: Record<string, string> = {
+  EQUAL:    'text-emerald-400 bg-emerald-400/10',
+  WEIGHTED: 'text-amber-400 bg-amber-400/10',
+  RANDOM:   'text-cyan-400 bg-cyan-400/10',
+};
+
 interface RouletteCardProps {
   roulette: Roulette;
   index:    number;
@@ -42,47 +48,57 @@ export function RouletteCard({ roulette, index }: RouletteCardProps) {
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: index * 0.05 }}
       onClick={() => router.push(`/roulette/${roulette.id}`)}
-      className="glass rounded-2xl p-4 cursor-pointer hover:ring-1 hover:ring-primary-500/40 transition-all"
+      className="glass rounded-2xl p-4 cursor-pointer hover:ring-2 hover:ring-primary-500/40 hover:bg-primary-500/4 transition-all group"
     >
       <div className="flex items-start justify-between gap-2">
-        <div className="flex-1 min-w-0">
-          <h3 className="font-title font-bold text-white truncate">{roulette.name}</h3>
-          <div className="flex items-center gap-2 mt-1">
-            <span className="text-xs text-slate-500 font-accent">
-              {MODE_LABEL[roulette.mode] ?? roulette.mode}
-            </span>
-            {roulette.isSurpriseMode && (
-              <span className="text-xs bg-accent-500/20 text-accent-400 px-1.5 py-0.5 rounded-full">Surprise</span>
-            )}
-            <span className="text-xs text-slate-600">·</span>
-            <span className="text-xs text-slate-500">{roulette.segments.length} segments</span>
+        <div className="flex items-center gap-3 flex-1 min-w-0">
+          {/* Icon */}
+          <div className="w-11 h-11 rounded-2xl bg-gradient-to-br from-primary-600/30 to-accent-500/20 border border-primary-500/20 flex items-center justify-center text-xl shrink-0 group-hover:scale-105 transition-transform">
+            {roulette.isSurpriseMode ? '🎭' : '🎡'}
+          </div>
+
+          <div className="min-w-0">
+            <h3 className="font-title font-black text-white truncate leading-tight">{roulette.name}</h3>
+            <div className="flex items-center gap-1.5 mt-1 flex-wrap">
+              <span className={`text-xs font-bold px-2 py-0.5 rounded-full ${MODE_COLOR[roulette.mode] ?? 'text-slate-400 bg-white/5'}`}>
+                {MODE_LABEL[roulette.mode] ?? roulette.mode}
+              </span>
+              {roulette.isSurpriseMode && (
+                <span className="text-xs font-bold bg-accent-500/15 text-accent-400 px-2 py-0.5 rounded-full">
+                  Surprise
+                </span>
+              )}
+              <span className="text-xs text-slate-500 font-bold">{roulette.segments.length} seg.</span>
+            </div>
           </div>
         </div>
 
         <button
           onClick={handleDelete}
           disabled={deleteMutation.isPending}
-          className="text-slate-500 hover:text-red-400 active:text-red-400 transition-colors p-2 rounded-xl hover:bg-red-500/10 active:bg-red-500/10 shrink-0"
+          className="text-slate-600 hover:text-red-400 transition-colors p-2 rounded-xl hover:bg-red-500/10 shrink-0"
           aria-label="Supprimer"
         >
           {deleteMutation.isPending ? '…' : '🗑'}
         </button>
       </div>
 
-      {/* Segment color preview */}
-      <div className="flex gap-1 mt-3 overflow-hidden">
-        {roulette.segments.slice(0, 8).map((seg, i) => (
-          <div
-            key={seg.id}
-            className="h-1.5 rounded-full flex-1"
-            style={{ backgroundColor: seg.color || '#FF6B35' }}
-            title={seg.label}
-          />
-        ))}
-        {roulette.segments.length > 8 && (
-          <span className="text-xs text-slate-600 ml-1">+{roulette.segments.length - 8}</span>
-        )}
-      </div>
+      {/* Segment color bar */}
+      {roulette.segments.length > 0 && (
+        <div className="flex gap-1 mt-3 overflow-hidden rounded-full">
+          {roulette.segments.slice(0, 10).map((seg) => (
+            <div
+              key={seg.id}
+              className="h-2 rounded-full flex-1"
+              style={{ backgroundColor: seg.color || '#FF6B35' }}
+              title={seg.label}
+            />
+          ))}
+          {roulette.segments.length > 10 && (
+            <span className="text-xs text-slate-600 ml-1 font-bold">+{roulette.segments.length - 10}</span>
+          )}
+        </div>
+      )}
     </motion.div>
   );
 }
