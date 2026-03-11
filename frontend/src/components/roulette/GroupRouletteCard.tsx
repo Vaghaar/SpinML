@@ -77,14 +77,22 @@ export function GroupRouletteCard({ roulette, index, currentUserId, isAdmin }: G
           )}
         </div>
         <div className="flex gap-1 mt-3 overflow-hidden">
-          {roulette.segments.slice(0, 8).map(seg => (
-            <div
-              key={seg.id}
-              className="h-1.5 rounded-full flex-1"
-              style={{ backgroundColor: seg.color || '#FF6B35' }}
-              title={seg.label}
-            />
-          ))}
+          {roulette.isSurpriseMode
+            ? roulette.segments.slice(0, 8).map(seg => (
+                <div
+                  key={seg.id}
+                  className="h-1.5 rounded-full flex-1 bg-slate-600"
+                />
+              ))
+            : roulette.segments.slice(0, 8).map(seg => (
+                <div
+                  key={seg.id}
+                  className="h-1.5 rounded-full flex-1"
+                  style={{ backgroundColor: seg.color || '#FF6B35' }}
+                  title={seg.label}
+                />
+              ))
+          }
           {roulette.segments.length > 8 && (
             <span className="text-xs text-slate-600 ml-1">+{roulette.segments.length - 8}</span>
           )}

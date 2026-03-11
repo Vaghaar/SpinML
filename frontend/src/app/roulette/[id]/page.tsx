@@ -256,26 +256,36 @@ export default function RoulettePage() {
         )}
       </AnimatePresence>
 
-      {/* Segment list */}
+      {/* Segment list — masquée en mode surprise jusqu'à la révélation */}
       <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ delay: 0.4 }}
         className="mt-8 w-full max-w-sm px-4"
       >
-        <h2 className="font-title text-sm text-slate-400 mb-3 uppercase tracking-widest">
-          Segments ({roulette.segments.length})
-        </h2>
-        <div className="flex flex-col gap-2">
-          {roulette.segments.map((seg, i) => (
-            <SegmentRow
-              key={seg.id}
-              segment={seg}
-              index={i}
-              isWinner={phase === 'result' && seg.id === lastSpinResp?.winningSegmentId}
-            />
-          ))}
-        </div>
+        {roulette.isSurpriseMode && phase !== 'result' ? (
+          <div className="flex flex-col items-center gap-2 py-6 text-slate-500">
+            <span className="text-4xl">🎁</span>
+            <p className="text-sm">Les options sont cachées jusqu'à la révélation</p>
+            <p className="text-xs text-slate-600">{roulette.segments.length} segments</p>
+          </div>
+        ) : (
+          <>
+            <h2 className="font-title text-sm text-slate-400 mb-3 uppercase tracking-widest">
+              Segments ({roulette.segments.length})
+            </h2>
+            <div className="flex flex-col gap-2">
+              {roulette.segments.map((seg, i) => (
+                <SegmentRow
+                  key={seg.id}
+                  segment={seg}
+                  index={i}
+                  isWinner={phase === 'result' && seg.id === lastSpinResp?.winningSegmentId}
+                />
+              ))}
+            </div>
+          </>
+        )}
       </motion.div>
     </div>
   );
