@@ -1,13 +1,11 @@
 'use client';
 
-import { useEffect, useState } from 'react';
-import { useRouter }           from 'next/navigation';
-import { motion }              from 'framer-motion';
-import { RouletteCanvas }      from '@/components/landing/RouletteCanvas';
-import { GoogleSignInButton }  from '@/components/landing/GoogleSignInButton';
-import { useAuthStore }        from '@/stores/authStore';
-import { authApi }             from '@/lib/api';
-import { toast }               from '@/components/ui/Toast';
+import { useEffect } from 'react';
+import { useRouter }  from 'next/navigation';
+import { motion }     from 'framer-motion';
+import { RouletteCanvas }     from '@/components/landing/RouletteCanvas';
+import { GoogleSignInButton } from '@/components/landing/GoogleSignInButton';
+import { useAuthStore }       from '@/stores/authStore';
 
 // Stats de présentation
 const STATS = [
@@ -18,8 +16,7 @@ const STATS = [
 
 export default function LandingPage() {
   const router          = useRouter();
-  const { isAuthenticated, isLoading, login } = useAuthStore();
-  const [guestLoading, setGuestLoading] = useState(false);
+  const { isAuthenticated, isLoading } = useAuthStore();
 
   // Rediriger si déjà authentifié
   useEffect(() => {
@@ -29,21 +26,6 @@ export default function LandingPage() {
       router.replace(redirect ?? '/dashboard');
     }
   }, [isAuthenticated, isLoading, router]);
-
-  const handleGuest = async () => {
-    setGuestLoading(true);
-    try {
-      const { data } = await authApi.guest();
-      login(data.accessToken, data.user);
-      const redirect = sessionStorage.getItem('redirectAfterLogin');
-      sessionStorage.removeItem('redirectAfterLogin');
-      router.replace(redirect ?? '/dashboard');
-    } catch (err) {
-      console.error('[guest] erreur:', err);
-      toast.error('Connexion impossible', 'Le serveur est inaccessible. Vérifiez que le backend est démarré.');
-      setGuestLoading(false);
-    }
-  };
 
   return (
     <main className="relative min-h-dvh flex flex-col items-center justify-center overflow-hidden bg-dark-bg">
@@ -109,13 +91,6 @@ export default function LandingPage() {
           className="mb-4 flex flex-col items-center gap-3"
         >
           <GoogleSignInButton size="lg" />
-          <button
-            onClick={handleGuest}
-            disabled={guestLoading}
-            className="text-sm text-slate-400 hover:text-white transition-colors underline underline-offset-4 disabled:opacity-50"
-          >
-            {guestLoading ? 'Connexion…' : 'Continuer sans compte'}
-          </button>
         </motion.div>
 
         {/* Note */}

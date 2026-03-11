@@ -13,7 +13,6 @@ export interface User {
   streakCount:    number;
   foodAvatarType: FoodAvatar;
   theme:          UserTheme;
-  isGuest:        boolean;
 }
 
 // ─── Auth ─────────────────────────────────────────────────────────────────────

@@ -121,20 +121,6 @@ export default function DashboardPage() {
 
       <div className="max-w-2xl mx-auto px-4 pt-6 flex flex-col gap-8">
 
-        {/* Bannière invité */}
-        {user.isGuest && (
-          <motion.div initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }}
-            className="glass rounded-2xl px-4 py-3 flex items-center justify-between border border-accent-500/30">
-            <p className="text-sm text-slate-300">
-              Vous êtes en mode invité — vos données ne sont pas sauvegardées.
-            </p>
-            <button onClick={() => router.push('/')}
-              className="text-xs font-bold text-accent-400 hover:text-accent-300 transition-colors ml-4 shrink-0">
-              Se connecter
-            </button>
-          </motion.div>
-        )}
-
         {/* User hero */}
         <motion.div initial={{ opacity: 0, y: -16 }} animate={{ opacity: 1, y: 0 }}
           className="glass rounded-2xl p-5">
