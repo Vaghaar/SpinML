@@ -25,8 +25,8 @@ export function LogoutButton({ onClick, className, label = 'Déconnexion' }: Log
       disabled={falling}
       className={cn(
         'logout-btn relative overflow-hidden flex items-center gap-2',
-        'text-xs font-bold px-3 py-1.5 rounded-full transition-all',
-        'text-slate-500 hover:text-slate-300 hover:bg-white/5',
+        'text-sm font-bold px-4 py-2 rounded-full transition-all',
+        'text-slate-400 hover:text-slate-200 hover:bg-white/8',
         falling && 'pointer-events-none',
         className,
       )}
@@ -34,8 +34,8 @@ export function LogoutButton({ onClick, className, label = 'Déconnexion' }: Log
       <span className="relative z-10">{label}</span>
 
       {/* Door SVG */}
-      <span className="relative w-4 h-4 shrink-0">
-        <svg viewBox="0 0 16 16" className="w-4 h-4 absolute inset-0" fill="none">
+      <span className="relative w-5 h-5 shrink-0">
+        <svg viewBox="0 0 16 16" className="w-5 h-5 absolute inset-0" fill="none">
           {/* Doorframe */}
           <rect x="4" y="2" width="8" height="12" rx="0.5" stroke="currentColor" strokeWidth="1.2" fill="none" opacity="0.5"/>
           {/* Door panel */}
@@ -47,7 +47,7 @@ export function LogoutButton({ onClick, className, label = 'Déconnexion' }: Log
         {/* Walking figure */}
         <span
           className={cn(
-            'figure absolute right-0.5 bottom-0.5 text-[8px] leading-none transition-all duration-700',
+            'figure absolute right-0.5 bottom-0.5 text-[10px] leading-none transition-all duration-700',
             falling
               ? 'translate-x-4 opacity-0 -rotate-90'
               : 'translate-x-0 opacity-100 rotate-0',
