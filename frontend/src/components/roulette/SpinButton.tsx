@@ -50,15 +50,7 @@ export function SpinButton({ phase, onClick, disabled, className }: SpinButtonPr
       )}
       aria-label={config.label}
     >
-      {/* Spinning ring overlay */}
-      {isSpinning && (
-        <span className="absolute inset-0 rounded-full border-2 border-white/25 animate-spin" />
-      )}
-
-      <span className="relative z-10 flex items-center gap-2.5">
-        {isSpinning && (
-          <span className="w-5 h-5 rounded-full border-2 border-white border-t-transparent animate-spin" />
-        )}
+      <span className="relative z-10">
         {config.label}
       </span>
     </motion.button>
