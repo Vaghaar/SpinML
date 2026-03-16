@@ -239,17 +239,6 @@ function drawHub(ctx: CanvasRenderingContext2D, cx: number, cy: number, phase: S
   const outerR = 24;
   const innerR = 14;
 
-  // Pulsing glow during spin
-  if (phase !== 'idle' && phase !== 'result') {
-    const glow = ctx.createRadialGradient(cx, cy, innerR, cx, cy, outerR + 12);
-    glow.addColorStop(0, 'rgba(255,107,53,0.6)');
-    glow.addColorStop(1, 'rgba(255,107,53,0)');
-    ctx.beginPath();
-    ctx.arc(cx, cy, outerR + 12, 0, Math.PI * 2);
-    ctx.fillStyle = glow;
-    ctx.fill();
-  }
-
   // Outer ring
   ctx.beginPath();
   ctx.arc(cx, cy, outerR, 0, Math.PI * 2);
