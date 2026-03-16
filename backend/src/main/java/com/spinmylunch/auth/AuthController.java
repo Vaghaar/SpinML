@@ -2,6 +2,7 @@ package com.spinmylunch.auth;
 
 import com.spinmylunch.auth.dto.AuthResponse;
 import com.spinmylunch.auth.dto.GoogleAuthRequest;
+import com.spinmylunch.auth.dto.NameAuthRequest;
 import com.spinmylunch.auth.dto.UserExportDto;
 import com.spinmylunch.auth.security.CurrentUser;
 import com.spinmylunch.auth.service.AuthService;
