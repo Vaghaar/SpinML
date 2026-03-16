@@ -1,6 +1,5 @@
 package com.spinmylunch.roulette.service;
 
-import com.spinmylunch.domain.roulette.RouletteMode;
 import com.spinmylunch.domain.roulette.Segment;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -47,7 +46,7 @@ public class SpinService {
      * @param mode      Mode de pondération
      * @return          Résultat : segment gagnant + serverAngle
      */
-    public SpinResult computeSpin(List<Segment> segments, RouletteMode mode) {
+    public SpinResult computeSpin(List<Segment> segments) {
         if (segments == null || segments.isEmpty()) {
             throw new IllegalArgumentException("La roulette n'a pas de segments");
         }
@@ -56,7 +55,7 @@ public class SpinService {
             return new SpinResult(segments.get(0), BigDecimal.valueOf(angle).setScale(4, RoundingMode.HALF_UP));
         }
 
-        double[] weights = resolveWeights(segments, mode);
+        double[] weights = storedWeights(segments);
         Segment winner   = weightedSelect(segments, weights);
         double   angle   = computeServerAngle(segments, winner, weights);
 
@@ -68,40 +67,11 @@ public class SpinService {
         );
     }
 
-    // ─── Résolution des poids selon le mode ──────────────────────────────────
-
-    private double[] resolveWeights(List<Segment> segments, RouletteMode mode) {
-        return switch (mode) {
-            case EQUAL    -> equalWeights(segments.size());
-            case WEIGHTED -> storedWeights(segments);
-            case RANDOM   -> randomWeights(segments.size());
-        };
-    }
-
-    /** Tous les segments avec le même poids (1.0 chacun). */
-    private double[] equalWeights(int n) {
-        double[] w = new double[n];
-        for (int i = 0; i < n; i++) w[i] = 1.0;
-        return w;
-    }
-
-    /** Poids définis par l'utilisateur (stockés en BDD). */
+    /** Poids des segments (= nb de propositions par label, agrégé en amont). */
     private double[] storedWeights(List<Segment> segments) {
         return segments.stream()
                 .mapToDouble(Segment::getWeightAsDouble)
                 .toArray();
-    }
-
-    /**
-     * Poids aléatoires régénérés à chaque spin — chaque spin peut favoriser
-     * des segments différents (mode "surprise" de probabilité).
-     */
-    private double[] randomWeights(int n) {
-        double[] w = new double[n];
-        for (int i = 0; i < n; i++) {
-            w[i] = 0.1 + secureRandom.nextDouble() * 9.9; // [0.1, 10.0)
-        }
-        return w;
     }
 
     // ─── Sélection pondérée (algorithme Roulette Wheel Selection) ─────────────

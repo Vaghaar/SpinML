@@ -183,8 +183,8 @@ export default function RoulettePage() {
         <h1 className="font-title font-black text-white text-lg truncate max-w-[60%]">
           {roulette.name}
         </h1>
-        <span className="text-xs font-bold text-primary-300 bg-primary-500/10 px-2.5 py-1 rounded-full capitalize">
-          {roulette.mode.toLowerCase()}
+        <span className="text-xs font-bold text-primary-300 bg-primary-500/10 px-2.5 py-1 rounded-full">
+          🎡 Pondéré
         </span>
       </motion.header>
 
@@ -319,8 +319,8 @@ function SegmentRow({ segment, index, isWinner }: {
       <span className="font-body text-sm text-slate-200 flex-1 truncate">
         {segment.label}
       </span>
-      {segment.weight !== 1 && (
-        <span className="text-xs text-slate-500 font-accent">×{segment.weight}</span>
+      {segment.weight > 1 && (
+        <span className="text-xs text-primary-400 font-bold">{segment.weight}×</span>
       )}
       {isWinner && <span className="text-xs text-primary-400 font-bold">✓</span>}
     </motion.div>

@@ -21,9 +21,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -76,7 +75,7 @@ public class RouletteService {
                 .group(group)
                 .creator(creator)
                 .name(req.name())
-                .mode(req.mode())
+                .mode(com.spinmylunch.domain.roulette.RouletteMode.WEIGHTED)
                 .isSurpriseMode(req.isSurpriseMode())
                 .status(status)
                 .build();
@@ -240,7 +239,6 @@ public class RouletteService {
         requireWriteAccess(roulette, requester);
 
         if (req.name() != null)           roulette.setName(req.name());
-        if (req.mode() != null)           roulette.setMode(req.mode());
         if (req.isSurpriseMode() != null) roulette.setSurpriseMode(req.isSurpriseMode());
 
         if (req.segments() != null) {
@@ -281,15 +279,25 @@ public class RouletteService {
             throw AppException.of(ErrorCode.VALIDATION_ERROR, "La roulette n'a pas de segments");
         }
 
-        // Calcul serveur : segment gagnant + angle
-        SpinService.SpinResult spinResult = spinService.computeSpin(segments, roulette.getMode());
+        // Agréger les segments par label : poids = nb de propositions
+        List<Segment> aggregated = aggregateByLabel(segments);
+
+        // Calcul serveur : segment gagnant + angle (toujours pondéré par nb de propositions)
+        SpinService.SpinResult spinResult = spinService.computeSpin(aggregated);
+
+        // Trouver le vrai segment en BDD correspondant au gagnant agrégé
+        UUID winnerId = spinResult.winner().getId();
+        Segment winnerSegment = segments.stream()
+                .filter(s -> s.getId().equals(winnerId))
+                .findFirst()
+                .orElse(segments.get(0));
 
         // Persister le résultat
         com.spinmylunch.domain.roulette.SpinResult saved = spinResultRepository.save(
                 com.spinmylunch.domain.roulette.SpinResult.builder()
                         .roulette(roulette)
                         .group(roulette.getGroup())
-                        .winningSegment(spinResult.winner())
+                        .winningSegment(winnerSegment)
                         .serverAngle(spinResult.serverAngle())
                         .spunBy(user)
                         .build()
@@ -426,8 +434,31 @@ public class RouletteService {
         roulette.getSegments().addAll(segments);
     }
 
+    /** Agrège les segments par label (insensible à la casse) : poids = nb de propositions. */
+    private List<Segment> aggregateByLabel(List<Segment> segments) {
+        LinkedHashMap<String, List<Segment>> grouped = new LinkedHashMap<>();
+        for (Segment s : segments) {
+            grouped.computeIfAbsent(s.getLabel().trim().toLowerCase(), k -> new ArrayList<>()).add(s);
+        }
+        return grouped.values().stream()
+                .map(group -> {
+                    Segment first = group.get(0);
+                    return Segment.builder()
+                            .id(first.getId())
+                            .label(first.getLabel())
+                            .weight(BigDecimal.valueOf(group.size()))
+                            .color(first.getColor())
+                            .position(first.getPosition())
+                            .proposedBy(first.getProposedBy())
+                            .build();
+                })
+                .sorted(Comparator.comparing(Segment::getPosition))
+                .toList();
+    }
+
     private RouletteResponse toResponse(Roulette r) {
-        List<RouletteResponse.SegmentResponse> segs = r.getSegments().stream()
+        List<Segment> aggregated = aggregateByLabel(r.getSegments());
+        List<RouletteResponse.SegmentResponse> segs = aggregated.stream()
                 .map(s -> new RouletteResponse.SegmentResponse(
                         s.getId(),
                         s.getLabel(),

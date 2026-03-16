@@ -5,8 +5,6 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { rouletteApi } from '@/lib/api';
 import { toast } from '@/components/ui/Toast';
-import type { RouletteMode } from '@/types';
-
 interface CreateRouletteModalProps {
   open:     boolean;
   onClose:  () => void;
@@ -23,7 +21,6 @@ export function CreateRouletteModal({ open, onClose, groupId }: CreateRouletteMo
   const isGroupRoulette = !!groupId;
 
   const [name, setName]               = useState('');
-  const [mode, setMode]               = useState<RouletteMode>('EQUAL');
   const [surprise, setSurprise]       = useState(false);
   const [segments, setSegments]       = useState<SegmentInput[]>([
     { label: '', weight: 1 },
@@ -45,7 +42,6 @@ export function CreateRouletteModal({ open, onClose, groupId }: CreateRouletteMo
   const mutation = useMutation({
     mutationFn: () => rouletteApi.create({
       name,
-      mode,
       isSurpriseMode: surprise,
       groupId: groupId ?? null,
       // Roulette de groupe : pas de segments → démarre en PENDING (collecte de propositions)
@@ -61,7 +57,6 @@ export function CreateRouletteModal({ open, onClose, groupId }: CreateRouletteMo
       if (groupId) queryClient.invalidateQueries({ queryKey: ['group-roulettes', groupId] });
       onClose();
       setName('');
-      setMode('EQUAL');
       setSurprise(false);
       setSegments([{ label: '', weight: 1 }, { label: '', weight: 1 }]);
     },
@@ -111,26 +106,6 @@ export function CreateRouletteModal({ open, onClose, groupId }: CreateRouletteMo
                 />
               </div>
 
-              {/* Mode */}
-              <div className="flex flex-col gap-1.5">
-                <label className="text-xs text-slate-400 uppercase tracking-wider">Mode</label>
-                <div className="grid grid-cols-3 gap-2">
-                  {(['EQUAL', 'WEIGHTED', 'RANDOM'] as RouletteMode[]).map(m => (
-                    <button
-                      key={m}
-                      onClick={() => setMode(m)}
-                      className={`py-2 rounded-xl text-xs font-semibold transition-colors ${
-                        mode === m
-                          ? 'bg-primary-500 text-white'
-                          : 'bg-white/5 text-slate-400 hover:bg-white/10'
-                      }`}
-                    >
-                      {m === 'EQUAL' ? 'Égal' : m === 'WEIGHTED' ? 'Pondéré' : 'Aléatoire'}
-                    </button>
-                  ))}
-                </div>
-              </div>
-
               {/* Surprise */}
               <label className="flex items-center gap-3 cursor-pointer">
                 <input
@@ -168,16 +143,6 @@ export function CreateRouletteModal({ open, onClose, groupId }: CreateRouletteMo
                           maxLength={255}
                           className="flex-1 bg-white/5 border border-white/10 rounded-xl px-3 py-2 text-white placeholder-slate-600 focus:outline-none focus:border-primary-500 text-sm"
                         />
-                        {mode === 'WEIGHTED' && (
-                          <input
-                            type="number"
-                            min={1}
-                            max={100}
-                            value={seg.weight}
-                            onChange={e => updateSegment(i, 'weight', Number(e.target.value))}
-                            className="w-14 text-center bg-white/5 border border-white/10 rounded-xl px-2 py-2 text-white text-sm focus:outline-none focus:border-primary-500"
-                          />
-                        )}
                         <button
                           onClick={() => removeSegment(i)}
                           disabled={segments.length <= 2}
