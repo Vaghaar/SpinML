@@ -1,7 +1,6 @@
 package com.spinmylunch.auth.service;
 
-import com.spinmylunch.auth.dto.AuthResponse;
-import com.spinmylunch.auth.dto.UserExportDto;
+import com.spinmylunch.auth.dto.*;
 import com.spinmylunch.common.exception.AppException;
 import com.spinmylunch.common.exception.ErrorCode;
 import com.spinmylunch.config.AppProperties;
@@ -33,10 +32,33 @@ public class AuthService {
 
     public static final String REFRESH_COOKIE_NAME = "refresh_token";
 
+    private final GoogleOAuthService      googleOAuthService;
     private final JwtService              jwtService;
     private final UserRepository          userRepository;
     private final RefreshTokenRepository  refreshTokenRepository;
     private final AppProperties           appProperties;
+
+    // ─── Google OAuth : connexion / inscription ────────────────────────────────
+
+    @Transactional
+    public AuthResponse loginWithGoogle(String code, String redirectUri,
+                                        HttpServletResponse response) {
+        GoogleUserInfo googleUser = googleOAuthService.fetchUserInfo(code, redirectUri);
+
+        if (!googleUser.emailVerified()) {
+            throw AppException.of(ErrorCode.EMAIL_NOT_VERIFIED);
+        }
+
+        User user = userRepository.findByGoogleId(googleUser.sub())
+                .map(u -> updateUser(u, googleUser))
+                .orElseGet(() -> createUser(googleUser));
+
+        user.touch();
+        user.addXp(0); // recalcul niveau sans bonus
+        userRepository.save(user);
+
+        return buildAuthResponse(user, response);
+    }
 
     // ─── Refresh token ────────────────────────────────────────────────────────
 
@@ -144,6 +166,22 @@ public class AuthService {
 
     // ─── Helpers privés ──────────────────────────────────────────────────────
 
+    private User createUser(GoogleUserInfo g) {
+        return userRepository.save(User.builder()
+                .googleId(g.sub())
+                .email(g.email())
+                .name(g.name())
+                .pictureUrl(g.picture())
+                .foodAvatarType(User.randomAvatar())
+                .build());
+    }
+
+    private User updateUser(User user, GoogleUserInfo g) {
+        user.setName(g.name());
+        user.setPictureUrl(g.picture());
+        return user;
+    }
+
     private AuthResponse buildAuthResponse(User user, HttpServletResponse response) {
         String accessToken = jwtService.generateAccessToken(user);
 
@@ -185,18 +223,6 @@ public class AuthService {
                 "%s=; Max-Age=0; Path=/api/v1/auth; HttpOnly; SameSite=%s%s",
                 REFRESH_COOKIE_NAME, sameSite, secure ? "; Secure" : "");
         response.addHeader("Set-Cookie", cookie);
-    }
-
-    // ─── Connexion par nom ────────────────────────────────────────────────────
-
-    @Transactional
-    public AuthResponse loginWithName(String name, HttpServletResponse response) {
-        User user = userRepository.save(User.builder()
-                .email("user_" + UUID.randomUUID() + "@spinmylunch.local")
-                .name(name.trim())
-                .foodAvatarType(User.randomAvatar())
-                .build());
-        return buildAuthResponse(user, response);
     }
 
     // ─── Connexion invité ─────────────────────────────────────────────────────

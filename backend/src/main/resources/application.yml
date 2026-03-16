@@ -52,6 +52,17 @@ spring:
     redis:
       time-to-live: 600000  # 10 minutes
 
+  # ─── Security OAuth2 ─────────────────────────────────────────────────────
+  security:
+    oauth2:
+      client:
+        registration:
+          google:
+            client-id: ${GOOGLE_CLIENT_ID}
+            client-secret: ${GOOGLE_CLIENT_SECRET}
+            scope: openid, profile, email
+            redirect-uri: "${FRONTEND_URL:http://localhost:3000}/auth/callback"
+
 # ─── Application custom ────────────────────────────────────────────────────
 app:
   jwt:

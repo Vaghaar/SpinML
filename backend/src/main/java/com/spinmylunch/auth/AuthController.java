@@ -1,7 +1,7 @@
 package com.spinmylunch.auth;
 
 import com.spinmylunch.auth.dto.AuthResponse;
-import com.spinmylunch.auth.dto.NameAuthRequest;
+import com.spinmylunch.auth.dto.GoogleAuthRequest;
 import com.spinmylunch.auth.dto.UserExportDto;
 import com.spinmylunch.auth.security.CurrentUser;
 import com.spinmylunch.auth.service.AuthService;
@@ -24,15 +24,17 @@ public class AuthController {
     private final AuthService authService;
 
     /**
-     * POST /api/v1/auth/name
-     * Connexion simple par nom — aucun compte requis.
+     * POST /api/v1/auth/google
+     * Échange un code d'autorisation Google contre un JWT + refresh token (httpOnly cookie).
      */
-    @PostMapping("/name")
-    public ResponseEntity<AuthResponse> loginWithName(
-            @Valid @RequestBody NameAuthRequest request,
+    @PostMapping("/google")
+    public ResponseEntity<AuthResponse> loginWithGoogle(
+            @Valid @RequestBody GoogleAuthRequest request,
             HttpServletResponse response
     ) {
-        return ResponseEntity.ok(authService.loginWithName(request.name(), response));
+        AuthResponse auth = authService.loginWithGoogle(
+                request.code(), request.redirectUri(), response);
+        return ResponseEntity.ok(auth);
     }
 
     /**

@@ -106,8 +106,8 @@ export default api;
 // ─── Endpoints Auth ───────────────────────────────────────────────────────────
 
 export const authApi = {
-  nameLogin: (name: string) =>
-    api.post('/auth/name', { name }),
+  googleLogin: (code: string, redirectUri: string) =>
+    api.post('/auth/google', { code, redirectUri }),
   refresh:  () => api.post('/auth/refresh'),
   logout:   () => api.post('/auth/logout'),
   delete:   () => api.delete('/auth/account'),

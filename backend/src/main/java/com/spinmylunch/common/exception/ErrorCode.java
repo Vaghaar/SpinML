@@ -5,6 +5,8 @@ import org.springframework.http.HttpStatus;
 public enum ErrorCode {
 
     // Auth
+    GOOGLE_AUTH_FAILED(HttpStatus.UNAUTHORIZED, "Échec de l'authentification Google"),
+    EMAIL_NOT_VERIFIED(HttpStatus.UNAUTHORIZED, "L'adresse email Google n'est pas vérifiée"),
     INVALID_REFRESH_TOKEN(HttpStatus.UNAUTHORIZED, "Refresh token invalide"),
     EXPIRED_REFRESH_TOKEN(HttpStatus.UNAUTHORIZED, "Refresh token expiré"),
     UNAUTHORIZED(HttpStatus.UNAUTHORIZED, "Non authentifié"),
