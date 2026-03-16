@@ -12,6 +12,7 @@ import { CreateRouletteModal }    from '@/components/roulette/CreateRouletteModa
 import { CreateGroupModal }       from '@/components/group/CreateGroupModal';
 import { VoteSessionCard }        from '@/components/vote/VoteSessionCard';
 import { toast }                  from '@/components/ui/Toast';
+import { LogoutButton }           from '@/components/ui/LogoutButton';
 import type { Roulette, Group, LiveVoteUpdate } from '@/types';
 
 type DashTab = 'home' | 'roulettes' | 'groups';
@@ -141,12 +142,7 @@ export default function DashboardPage() {
                 : <span className="text-sm">👤</span>
               }
             </button>
-            <button
-              onClick={logout}
-              className="text-xs font-bold text-slate-500 hover:text-slate-300 px-2 py-1.5 rounded-full hover:bg-white/5 transition-all"
-            >
-              Déco
-            </button>
+            <LogoutButton onClick={logout} label="Déco" />
           </div>
         </div>
       </div>

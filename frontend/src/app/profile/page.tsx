@@ -11,6 +11,7 @@ import { StreakDisplay }        from '@/components/gamification/StreakDisplay';
 import { BadgeCard }           from '@/components/gamification/BadgeCard';
 import { TopFoodsChart }       from '@/components/charts/TopFoodsChart';
 import { toast }               from '@/components/ui/Toast';
+import { LogoutButton }        from '@/components/ui/LogoutButton';
 import type { ProfileData }    from '@/types/gamification';
 import type { StatsResponse }  from '@/types';
 
@@ -63,12 +64,7 @@ export default function ProfilePage() {
             ← Retour
           </button>
           <span className="font-title font-black text-white flex-1 text-lg">Mon profil</span>
-          <button
-            onClick={logout}
-            className="text-xs font-bold text-slate-500 hover:text-slate-300 px-3 py-1.5 rounded-full hover:bg-white/5 transition-all"
-          >
-            Déconnexion
-          </button>
+          <LogoutButton onClick={logout} />
         </div>
       </div>
 
