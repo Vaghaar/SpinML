@@ -1,13 +1,21 @@
 # Profil développement — surcharges de application.yml
+app:
+  jwt:
+    cookie-secure: false   # HTTP localhost — pas de flag Secure sur le cookie
+
 spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5433/spinmylunch
+    username: spinmylunch
+    password: "Ry@nD.orken005"
   jpa:
     properties:
       hibernate:
         format_sql: true
   data:
     redis:
-      password: redis_secret
-
+      port: 6380
+      password: "Ry@nD.orken005"
 logging:
   level:
     com.spinmylunch: DEBUG
