@@ -479,7 +479,7 @@ export default function DashboardPage() {
               <button
                 key={item.label}
                 onClick={() => {
-                  if ('id' in item) setTab(item.id);
+                  if ('id' in item) setTab(item.id as DashTab);
                   else router.push(item.path);
                 }}
                 className={`flex flex-col items-center gap-0.5 px-4 py-2 rounded-2xl transition-all ${
