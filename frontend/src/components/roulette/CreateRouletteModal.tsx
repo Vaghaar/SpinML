@@ -16,6 +16,10 @@ interface SegmentInput {
   weight: number;
 }
 
+function defaultName() {
+  return new Date().toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' });
+}
+
 export function CreateRouletteModal({ open, onClose, groupId }: CreateRouletteModalProps) {
   const queryClient = useQueryClient();
   const isGroupRoulette = !!groupId;
@@ -41,7 +45,7 @@ export function CreateRouletteModal({ open, onClose, groupId }: CreateRouletteMo
 
   const mutation = useMutation({
     mutationFn: () => rouletteApi.create({
-      name,
+      name: name.trim() || defaultName(),
       isSurpriseMode: surprise,
       groupId: groupId ?? null,
       // Roulette de groupe : pas de segments → démarre en PENDING (collecte de propositions)
@@ -63,8 +67,7 @@ export function CreateRouletteModal({ open, onClose, groupId }: CreateRouletteMo
     onError: () => toast.error('Erreur', 'Impossible de créer la roulette.'),
   });
 
-  const isValid = name.trim().length >= 2 &&
-    (isGroupRoulette || segments.every(s => s.label.trim().length > 0));
+  const isValid = isGroupRoulette || segments.every(s => s.label.trim().length > 0);
 
   return (
     <AnimatePresence>
@@ -96,12 +99,14 @@ export function CreateRouletteModal({ open, onClose, groupId }: CreateRouletteMo
 
               {/* Name */}
               <div className="flex flex-col gap-1.5">
-                <label className="text-xs text-slate-400 uppercase tracking-wider">Nom</label>
+                <label className="text-xs text-slate-400 uppercase tracking-wider">
+                  Nom <span className="normal-case text-slate-600">(optionnel)</span>
+                </label>
                 <input
                   value={name}
                   onChange={e => setName(e.target.value)}
                   maxLength={100}
-                  placeholder="Midi du vendredi…"
+                  placeholder={defaultName()}
                   className="bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 text-white placeholder-slate-600 focus:outline-none focus:border-primary-500 text-sm"
                 />
               </div>
