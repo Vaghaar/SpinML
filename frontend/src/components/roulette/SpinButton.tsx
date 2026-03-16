@@ -31,15 +31,8 @@ export function SpinButton({ phase, onClick, disabled, className }: SpinButtonPr
       disabled={!isClickable}
       whileHover={isClickable ? { scale: 1.06 } : {}}
       whileTap={isClickable   ? { scale: 0.96 } : {}}
-      animate={config.pulse
-        ? { boxShadow: [
-            '0 0 25px rgba(248,47,119,0.5), 0 4px 20px rgba(0,0,0,0.4)',
-            '0 0 55px rgba(248,47,119,0.9), 0 4px 20px rgba(0,0,0,0.4)',
-            '0 0 25px rgba(248,47,119,0.5), 0 4px 20px rgba(0,0,0,0.4)',
-          ] }
-        : {}
-      }
-      transition={config.pulse ? { duration: 1.8, repeat: Infinity, ease: 'easeInOut' } : {}}
+      animate={{}}
+      transition={{}}
       className={cn(
         'relative px-12 py-5 rounded-full font-title font-black text-xl text-white',
         'transition-all duration-300 select-none',
