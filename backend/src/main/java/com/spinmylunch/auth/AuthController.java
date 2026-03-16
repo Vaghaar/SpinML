@@ -39,11 +39,14 @@ public class AuthController {
 
     /**
      * POST /api/v1/auth/guest
-     * Crée une session invité sans compte Google.
+     * Crée une session invité avec un prénom (éphémère, pas de stats).
      */
     @PostMapping("/guest")
-    public ResponseEntity<AuthResponse> loginAsGuest(HttpServletResponse response) {
-        return ResponseEntity.ok(authService.createGuestSession(response));
+    public ResponseEntity<AuthResponse> loginAsGuest(
+            @Valid @RequestBody NameAuthRequest request,
+            HttpServletResponse response
+    ) {
+        return ResponseEntity.ok(authService.createGuestSession(request.name(), response));
     }
 
     /**

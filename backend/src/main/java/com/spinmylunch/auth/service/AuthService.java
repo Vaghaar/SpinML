@@ -228,11 +228,10 @@ public class AuthService {
     // ─── Connexion invité ─────────────────────────────────────────────────────
 
     @Transactional
-    public AuthResponse createGuestSession(HttpServletResponse response) {
-        String uid = UUID.randomUUID().toString().substring(0, 6).toUpperCase();
+    public AuthResponse createGuestSession(String name, HttpServletResponse response) {
         User guest = userRepository.save(User.builder()
                 .email("guest_" + UUID.randomUUID() + "@spinmylunch.local")
-                .name("Invité #" + uid)
+                .name(name.trim())
                 .isGuest(true)
                 .foodAvatarType(User.randomAvatar())
                 .build());

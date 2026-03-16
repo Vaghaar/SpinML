@@ -1,11 +1,12 @@
 'use client';
 
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useRouter }  from 'next/navigation';
 import { motion }     from 'framer-motion';
 import { RouletteCanvas }     from '@/components/landing/RouletteCanvas';
 import { GoogleSignInButton } from '@/components/landing/GoogleSignInButton';
 import { useAuthStore }       from '@/stores/authStore';
+import { authApi }            from '@/lib/api';
 
 const STATS = [
   { label: "Spins aujourd'hui", value: '3 247', icon: '🎡' },
@@ -23,7 +24,9 @@ const FEATURES = [
 
 export default function LandingPage() {
   const router = useRouter();
-  const { isAuthenticated, isLoading } = useAuthStore();
+  const { isAuthenticated, isLoading, login } = useAuthStore();
+  const [guestName, setGuestName]   = useState('');
+  const [guestLoading, setGuestLoading] = useState(false);
 
   useEffect(() => {
     if (!isLoading && isAuthenticated) {
@@ -32,6 +35,21 @@ export default function LandingPage() {
       router.replace(redirect ?? '/dashboard');
     }
   }, [isAuthenticated, isLoading, router]);
+
+  const handleGuestLogin = async (e: React.FormEvent) => {
+    e.preventDefault();
+    const name = guestName.trim();
+    if (!name) return;
+    setGuestLoading(true);
+    try {
+      const { data } = await authApi.guestLogin(name);
+      login(data.accessToken, data.user);
+    } catch {
+      // silently ignore — user stays on page
+    } finally {
+      setGuestLoading(false);
+    }
+  };
 
   return (
     <main className="relative min-h-dvh flex flex-col items-center justify-center overflow-hidden bg-dark-bg">
@@ -98,9 +116,33 @@ export default function LandingPage() {
           initial={{ opacity: 0, scale: 0.88 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ delay: 0.6, duration: 0.5, type: 'spring', stiffness: 220 }}
-          className="mb-6"
+          className="mb-4 flex flex-col items-center gap-4 w-full max-w-xs"
         >
           <GoogleSignInButton size="lg" />
+
+          <div className="flex items-center gap-3 w-full">
+            <div className="flex-1 h-px bg-white/10" />
+            <span className="text-xs text-slate-500 font-bold">ou</span>
+            <div className="flex-1 h-px bg-white/10" />
+          </div>
+
+          <form onSubmit={handleGuestLogin} className="flex w-full gap-2">
+            <input
+              value={guestName}
+              onChange={e => setGuestName(e.target.value)}
+              placeholder="Ton prénom..."
+              maxLength={50}
+              className="flex-1 bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 text-white placeholder-slate-600 focus:outline-none focus:border-primary-500 text-sm"
+            />
+            <button
+              type="submit"
+              disabled={!guestName.trim() || guestLoading}
+              className="px-4 py-2.5 rounded-xl bg-white/10 hover:bg-white/15 text-white font-bold text-sm disabled:opacity-40 transition-all border border-white/10"
+            >
+              {guestLoading ? '…' : 'Entrer'}
+            </button>
+          </form>
+          <p className="text-xs text-slate-600 font-semibold">Session éphémère · pas de stats</p>
         </motion.div>
 
         {/* Note */}

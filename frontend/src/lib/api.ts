@@ -108,6 +108,7 @@ export default api;
 export const authApi = {
   googleLogin: (code: string, redirectUri: string) =>
     api.post('/auth/google', { code, redirectUri }),
+  guestLogin:  (name: string) => api.post('/auth/guest', { name }),
   refresh:  () => api.post('/auth/refresh'),
   logout:   () => api.post('/auth/logout'),
   delete:   () => api.delete('/auth/account'),
