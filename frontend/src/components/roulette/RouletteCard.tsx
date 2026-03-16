@@ -7,17 +7,6 @@ import { rouletteApi } from '@/lib/api';
 import { toast } from '@/components/ui/Toast';
 import type { Roulette } from '@/types';
 
-const MODE_LABEL: Record<string, string> = {
-  EQUAL:    'Égal',
-  WEIGHTED: 'Pondéré',
-  RANDOM:   'Aléatoire',
-};
-
-const MODE_COLOR: Record<string, string> = {
-  EQUAL:    'text-emerald-400 bg-emerald-400/10',
-  WEIGHTED: 'text-amber-400 bg-amber-400/10',
-  RANDOM:   'text-cyan-400 bg-cyan-400/10',
-};
 
 interface RouletteCardProps {
   roulette: Roulette;
@@ -60,9 +49,6 @@ export function RouletteCard({ roulette, index }: RouletteCardProps) {
           <div className="min-w-0">
             <h3 className="font-title font-black text-white truncate leading-tight">{roulette.name}</h3>
             <div className="flex items-center gap-1.5 mt-1 flex-wrap">
-              <span className={`text-xs font-bold px-2 py-0.5 rounded-full ${MODE_COLOR[roulette.mode] ?? 'text-slate-400 bg-white/5'}`}>
-                {MODE_LABEL[roulette.mode] ?? roulette.mode}
-              </span>
               {roulette.isSurpriseMode && (
                 <span className="text-xs font-bold bg-accent-500/15 text-accent-400 px-2 py-0.5 rounded-full">
                   Surprise
