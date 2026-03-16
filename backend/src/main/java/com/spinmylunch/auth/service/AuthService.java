@@ -1,6 +1,7 @@
 package com.spinmylunch.auth.service;
 
 import com.spinmylunch.auth.dto.AuthResponse;
+import com.spinmylunch.auth.dto.UserExportDto;
 import com.spinmylunch.common.exception.AppException;
 import com.spinmylunch.common.exception.ErrorCode;
 import com.spinmylunch.config.AppProperties;
