@@ -2,6 +2,7 @@ package com.spinmylunch.auth;
 
 import com.spinmylunch.auth.dto.AuthResponse;
 import com.spinmylunch.auth.dto.GoogleAuthRequest;
+import com.spinmylunch.auth.dto.NameAuthRequest;
 import com.spinmylunch.auth.dto.UserExportDto;
 import com.spinmylunch.auth.security.CurrentUser;
 import com.spinmylunch.auth.service.AuthService;
@@ -35,6 +36,18 @@ public class AuthController {
         AuthResponse auth = authService.loginWithGoogle(
                 request.code(), request.redirectUri(), response);
         return ResponseEntity.ok(auth);
+    }
+
+    /**
+     * POST /api/v1/auth/name
+     * Connexion simple par nom — aucun compte requis.
+     */
+    @PostMapping("/name")
+    public ResponseEntity<AuthResponse> loginWithName(
+            @Valid @RequestBody NameAuthRequest request,
+            HttpServletResponse response
+    ) {
+        return ResponseEntity.ok(authService.loginWithName(request.name(), response));
     }
 
     /**

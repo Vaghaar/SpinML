@@ -3,9 +3,9 @@
 import { useEffect } from 'react';
 import { useRouter }  from 'next/navigation';
 import { motion }     from 'framer-motion';
-import { RouletteCanvas }     from '@/components/landing/RouletteCanvas';
-import { GoogleSignInButton } from '@/components/landing/GoogleSignInButton';
-import { useAuthStore }       from '@/stores/authStore';
+import { RouletteCanvas }  from '@/components/landing/RouletteCanvas';
+import { NameLoginForm }   from '@/components/landing/NameLoginForm';
+import { useAuthStore }    from '@/stores/authStore';
 
 const STATS = [
   { label: "Spins aujourd'hui", value: '3 247', icon: '🎡' },
@@ -98,9 +98,9 @@ export default function LandingPage() {
           initial={{ opacity: 0, scale: 0.88 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ delay: 0.6, duration: 0.5, type: 'spring', stiffness: 220 }}
-          className="mb-6"
+          className="mb-6 w-full max-w-sm"
         >
-          <GoogleSignInButton size="lg" />
+          <NameLoginForm />
         </motion.div>
 
         {/* Note */}
@@ -110,7 +110,7 @@ export default function LandingPage() {
           transition={{ delay: 0.8 }}
           className="text-xs text-slate-500 mb-12 font-semibold"
         >
-          Gratuit · Aucune carte requise · Connexion Google en un clic
+          Gratuit · Aucune carte requise · Aucun compte nécessaire
         </motion.p>
 
         {/* Stats cards */}

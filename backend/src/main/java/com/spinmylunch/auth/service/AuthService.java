@@ -225,6 +225,18 @@ public class AuthService {
         response.addHeader("Set-Cookie", cookie);
     }
 
+    // ─── Connexion par nom ────────────────────────────────────────────────────
+
+    @Transactional
+    public AuthResponse loginWithName(String name, HttpServletResponse response) {
+        User user = userRepository.save(User.builder()
+                .email("user_" + UUID.randomUUID() + "@spinmylunch.local")
+                .name(name.trim())
+                .foodAvatarType(User.randomAvatar())
+                .build());
+        return buildAuthResponse(user, response);
+    }
+
     // ─── Connexion invité ─────────────────────────────────────────────────────
 
     @Transactional
