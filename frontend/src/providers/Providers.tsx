@@ -2,9 +2,10 @@
 
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ReactQueryDevtools }               from '@tanstack/react-query-devtools';
-import { useEffect, useRef, useState }      from 'react';
+import { useEffect, useRef }                from 'react';
 import { Toaster }                          from '@/components/ui/Toast';
 import { useAuthStore }                     from '@/stores/authStore';
+import { useThemeStore }                    from '@/stores/themeStore';
 import api                                  from '@/lib/api';
 
 function makeQueryClient() {
@@ -34,6 +35,7 @@ export function Providers({ children }: { children: React.ReactNode }) {
   const queryClient = getQueryClient();
   return (
     <QueryClientProvider client={queryClient}>
+      <ThemeInitializer />
       <AuthInitializer />
       {children}
       <Toaster />
@@ -42,6 +44,21 @@ export function Providers({ children }: { children: React.ReactNode }) {
       )}
     </QueryClientProvider>
   );
+}
+
+/**
+ * Synchronise la classe dark/light sur <html> quand le store change.
+ */
+function ThemeInitializer() {
+  const { theme } = useThemeStore();
+
+  useEffect(() => {
+    const root = document.documentElement;
+    root.classList.add(theme);
+    root.classList.remove(theme === 'dark' ? 'light' : 'dark');
+  }, [theme]);
+
+  return null;
 }
 
 /**

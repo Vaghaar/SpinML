@@ -13,6 +13,7 @@ import { CreateGroupModal }       from '@/components/group/CreateGroupModal';
 import { VoteSessionCard }        from '@/components/vote/VoteSessionCard';
 import { toast }                  from '@/components/ui/Toast';
 import { LogoutButton }           from '@/components/ui/LogoutButton';
+import { ThemeToggle }            from '@/components/ui/ThemeToggle';
 import type { Roulette, Group, LiveVoteUpdate } from '@/types';
 
 type DashTab = 'home' | 'roulettes' | 'groups';
@@ -117,8 +118,7 @@ export default function DashboardPage() {
 
       {/* ── Top bar ──────────────────────────────────────────────────────────── */}
       <div
-        className="sticky top-0 z-20 backdrop-blur-xl border-b border-primary-900/40"
-        style={{ background: 'linear-gradient(135deg, rgba(13,6,20,0.97), rgba(22,10,42,0.97))' }}
+        className="sticky top-0 z-20 backdrop-blur-xl border-b border-primary-900/40 header-bg"
       >
         <div className="max-w-5xl mx-auto px-4 py-3 flex items-center justify-between">
           <span className="font-title font-black text-xl gradient-text">🎡 Spinmylunch</span>
@@ -142,6 +142,7 @@ export default function DashboardPage() {
                 : <span className="text-sm">👤</span>
               }
             </button>
+            <ThemeToggle />
             <LogoutButton onClick={logout} label="Déco" />
           </div>
         </div>
@@ -149,8 +150,7 @@ export default function DashboardPage() {
 
       {/* ── Tab bar ──────────────────────────────────────────────────────────── */}
       <div
-        className="sticky top-[53px] z-10 border-b border-primary-900/30"
-        style={{ background: 'rgba(13,6,20,0.92)', backdropFilter: 'blur(20px)' }}
+        className="sticky top-[53px] z-10 border-b border-primary-900/30 nav-bg backdrop-blur-xl"
       >
         <div className="max-w-5xl mx-auto px-4">
           <div className="flex">
@@ -461,8 +461,7 @@ export default function DashboardPage() {
       <CreateGroupModal open={showCreateGroup} onClose={() => setShowCreateGroup(false)} />
 
       {/* Bottom nav mobile */}
-      <nav className="fixed bottom-0 left-0 right-0 z-30 md:hidden border-t border-primary-900/40"
-        style={{ background: 'rgba(13,6,20,0.97)', backdropFilter: 'blur(20px)' }}>
+      <nav className="fixed bottom-0 left-0 right-0 z-30 md:hidden border-t border-primary-900/40 nav-bg backdrop-blur-xl">
         <div className="flex items-stretch justify-around max-w-sm mx-auto px-2 py-1">
           {[
             { id: 'home'      as DashTab, icon: '🏠', label: 'Accueil'   },

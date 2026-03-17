@@ -12,6 +12,7 @@ import { RouletteWheel }                    from '@/components/roulette/Roulette
 import { SpinButton }                       from '@/components/roulette/SpinButton';
 import { SpinResultCard }                   from '@/components/roulette/SpinResultCard';
 import { toast }                            from '@/components/ui/Toast';
+import { ThemeToggle }                       from '@/components/ui/ThemeToggle';
 import type { Roulette, SpinResponse, Segment, SpinSyncMessage } from '@/types';
 
 export default function RoulettePage() {
@@ -183,9 +184,12 @@ export default function RoulettePage() {
         <h1 className="font-title font-black text-white text-lg truncate max-w-[60%]">
           {roulette.name}
         </h1>
-        <span className="text-xs font-bold text-primary-300 bg-primary-500/10 px-2.5 py-1 rounded-full">
-          🎡 Pondéré
-        </span>
+        <div className="flex items-center gap-2">
+          <ThemeToggle />
+          <span className="text-xs font-bold text-primary-300 bg-primary-500/10 px-2.5 py-1 rounded-full">
+            🎡 Pondéré
+          </span>
+        </div>
       </motion.header>
 
       {/* Wheel area */}

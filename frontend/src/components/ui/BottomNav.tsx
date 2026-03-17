@@ -20,8 +20,7 @@ export function BottomNav({ active, onTabChange }: BottomNavProps) {
   return (
     <nav className="fixed bottom-0 left-0 right-0 z-30 md:hidden">
       <div
-        className="border-t border-primary-900/40 px-2 py-1"
-        style={{ background: 'rgba(13,6,20,0.97)', backdropFilter: 'blur(20px)' }}
+        className="border-t border-primary-900/40 px-2 py-1 nav-bg backdrop-blur-xl"
       >
         <div className="flex items-center justify-around max-w-sm mx-auto">
           {NAV_ITEMS.map(item => {

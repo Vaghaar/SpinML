@@ -12,6 +12,7 @@ import { BadgeCard }           from '@/components/gamification/BadgeCard';
 import { TopFoodsChart }       from '@/components/charts/TopFoodsChart';
 import { toast }               from '@/components/ui/Toast';
 import { LogoutButton }        from '@/components/ui/LogoutButton';
+import { ThemeToggle }         from '@/components/ui/ThemeToggle';
 import type { ProfileData }    from '@/types/gamification';
 import type { StatsResponse }  from '@/types';
 
@@ -53,8 +54,7 @@ export default function ProfilePage() {
 
       {/* ── Header ─────────────────────────────────────────────────────────── */}
       <div
-        className="sticky top-0 z-20 backdrop-blur-xl border-b border-primary-900/40"
-        style={{ background: 'linear-gradient(135deg, rgba(13,6,20,0.97), rgba(22,10,42,0.97))' }}
+        className="sticky top-0 z-20 backdrop-blur-xl border-b border-primary-900/40 header-bg"
       >
         <div className="max-w-4xl mx-auto px-4 py-3 flex items-center gap-3">
           <button
@@ -64,6 +64,7 @@ export default function ProfilePage() {
             ← Retour
           </button>
           <span className="font-title font-black text-white flex-1 text-lg">Mon profil</span>
+          <ThemeToggle />
           <LogoutButton onClick={logout} />
         </div>
       </div>
@@ -234,8 +235,7 @@ export default function ProfilePage() {
 
       {/* Bottom nav mobile */}
       <nav
-        className="fixed bottom-0 left-0 right-0 z-30 md:hidden border-t border-primary-900/40"
-        style={{ background: 'rgba(13,6,20,0.97)', backdropFilter: 'blur(20px)' }}
+        className="fixed bottom-0 left-0 right-0 z-30 md:hidden border-t border-primary-900/40 nav-bg backdrop-blur-xl"
       >
         <div className="flex items-stretch justify-around max-w-sm mx-auto px-2 py-1">
           {[

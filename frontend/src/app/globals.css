@@ -1,13 +1,19 @@
 @import "tailwindcss";
 
-/* ─── CSS Variables Spinmylunch (pickthewheel palette) ───────────────────── */
-:root {
+/* ─── CSS Variables — Mode sombre (défaut) ───────────────────────────────── */
+:root,
+.dark {
   --color-primary:    #F82F77;
   --color-secondary:  #06B6D4;
   --color-accent:     #FF6B35;
-  --color-bg-dark:    #06020C;
+
+  --color-bg:         #06020C;
+  --color-bg-dark:    #06020C;  /* alias rétrocompat */
   --color-surface:    #0D0614;
   --color-card:       #140920;
+  --color-border:     #211535;
+  --color-text:       #F1F5F9;
+  --color-text-muted: #94A3B8;
 
   /* Animation timing */
   --spin-anticipation: 0.5s;
@@ -22,6 +28,21 @@
   --z-toast:   1000;
 }
 
+/* ─── CSS Variables — Mode clair ─────────────────────────────────────────── */
+.light {
+  --color-primary:    #F82F77;
+  --color-secondary:  #06B6D4;
+  --color-accent:     #FF6B35;
+
+  --color-bg:         #F8F4FF;
+  --color-bg-dark:    #F8F4FF;
+  --color-surface:    #EDE9F7;
+  --color-card:       #FFFFFF;
+  --color-border:     #D6CCF0;
+  --color-text:       #0F0A1A;
+  --color-text-muted: #64748B;
+}
+
 /* ─── Reset & Base ─────────────────────────────────────────────────────────── */
 *, *::before, *::after {
   box-sizing: border-box;
@@ -34,12 +55,13 @@ html {
 
 body {
   font-family: "Nunito", sans-serif;
-  background-color: var(--color-bg-dark);
-  color: #F1F5F9;
+  background-color: var(--color-bg);
+  color: var(--color-text);
   min-height: 100dvh;
   overflow-x: hidden;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  transition: background-color 0.2s ease, color 0.2s ease;
 }
 
 /* ─── Typography ───────────────────────────────────────────────────────────── */
@@ -86,11 +108,22 @@ h1, h2, h3, h4, h5, h6 {
   border: 1px solid rgba(248, 47, 119, 0.15);
 }
 
+.light .glass {
+  background: rgba(255, 255, 255, 0.80);
+  border: 1px solid rgba(248, 47, 119, 0.20);
+  box-shadow: 0 2px 16px rgba(0, 0, 0, 0.06);
+}
+
 .glass-light {
   background: rgba(255, 255, 255, 0.05);
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
   border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.light .glass-light {
+  background: rgba(0, 0, 0, 0.03);
+  border: 1px solid rgba(0, 0, 0, 0.08);
 }
 
 .neon-border {
@@ -100,12 +133,50 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 .card-hero {
-  background: linear-gradient(135deg, #2A0A1F, #140920);
+  background: linear-gradient(135deg, var(--color-surface), var(--color-card));
   border: 1px solid rgba(248, 47, 119, 0.3);
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.6), 0 0 0 1px rgba(248, 47, 119, 0.08);
 }
 
-/* ─── Atmospheric blob decorations (pickthewheel-style) ───────────────────── */
+.light .card-hero {
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.10), 0 0 0 1px rgba(248, 47, 119, 0.15);
+}
+
+/* ─── Light mode text overrides ───────────────────────────────────────────── */
+/* En mode clair, text-white → text sombre, slate adapté */
+.light .text-white   { color: var(--color-text) !important; }
+.light .text-slate-400 { color: #475569 !important; }
+.light .text-slate-500 { color: #334155 !important; }
+.light .text-slate-300 { color: #1e293b !important; }
+.light .text-slate-600 { color: #1e293b !important; }
+
+/* bg-dark-bg, bg-dark-surface, bg-dark-card → variables thème */
+.light .bg-dark-bg      { background-color: var(--color-bg) !important; }
+.light .bg-dark-surface { background-color: var(--color-surface) !important; }
+.light .bg-dark-card    { background-color: var(--color-card) !important; }
+
+/* bg-white\/5, bg-white\/10 (glass buttons) → fond clair équivalent */
+.light .bg-white\/5  { background-color: rgba(0,0,0,0.04) !important; }
+.light .bg-white\/10 { background-color: rgba(0,0,0,0.07) !important; }
+.light .bg-white\/8  { background-color: rgba(0,0,0,0.06) !important; }
+.light .border-white\/10 { border-color: rgba(0,0,0,0.10) !important; }
+
+/* min-h-dvh bg-dark-bg container */
+.light .min-h-dvh { background-color: var(--color-bg); }
+
+/* ─── Header / BottomNav backgrounds ──────────────────────────────────────── */
+.header-bg {
+  background: linear-gradient(135deg,
+    color-mix(in srgb, var(--color-bg) 97%, transparent),
+    color-mix(in srgb, var(--color-surface) 97%, transparent)
+  );
+}
+
+.nav-bg {
+  background: color-mix(in srgb, var(--color-bg) 97%, transparent);
+}
+
+/* ─── Atmospheric blob decorations ───────────────────────────────────────── */
 .blob-pink {
   position: absolute;
   width: 700px;

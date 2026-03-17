@@ -50,12 +50,12 @@ const config: Config = {
           800: "#9A2F0C",
           900: "#7A2409",
         },
-        // ─── Surfaces très sombres (pickthewheel-style) ───────────────────
+        // ─── Surfaces adaptatives (light/dark via CSS var) ────────────────
         dark: {
-          bg:      "#06020C",
-          surface: "#0D0614",
-          card:    "#140920",
-          border:  "#211535",
+          bg:      "var(--color-bg)",
+          surface: "var(--color-surface)",
+          card:    "var(--color-card)",
+          border:  "var(--color-border)",
         },
       },
 
