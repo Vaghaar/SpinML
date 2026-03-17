@@ -68,14 +68,7 @@ export default function ProfilePage() {
         </div>
       </div>
 
-      {/* ── Hero banner ────────────────────────────────────────────────────── */}
-      <div className="relative h-28 sm:h-36 overflow-hidden"
-        style={{ background: 'linear-gradient(135deg, rgba(124,58,237,0.4), rgba(45,27,105,0.6), rgba(255,107,53,0.2))' }}>
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_left,rgba(167,139,250,0.15),transparent_60%)]" />
-        <div className="absolute bottom-0 left-0 right-0 h-16 bg-gradient-to-t from-dark-bg to-transparent" />
-      </div>
-
-      <div className="max-w-4xl mx-auto px-4 -mt-14 sm:-mt-16 flex flex-col gap-6">
+      <div className="max-w-4xl mx-auto px-4 pt-6 flex flex-col gap-6">
 
         {/* ── Avatar + identité ──────────────────────────────────────────────── */}
         <motion.div
