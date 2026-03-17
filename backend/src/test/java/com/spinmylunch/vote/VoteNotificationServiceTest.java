@@ -46,7 +46,7 @@ class VoteNotificationServiceTest {
         Vote v4 = vote(optC);                        // 1 pour Burger
 
         List<LiveVoteUpdate.OptionResult> results = service.computeOptionResults(
-                List.of(optA, optB, optC), List.of(v1, v2, v3, v4), VoteMode.MAJORITY);
+                List.of(optA, optB, optC), List.of(v1, v2, v3, v4));
 
         assertThat(results).hasSize(3);
 
@@ -62,28 +62,12 @@ class VoteNotificationServiceTest {
     }
 
     @Test
-    void computeOptionResults_points_sumsPoints() {
-        VoteOption optA = option("Pizza");
-        VoteOption optB = option("Sushi");
-
-        Vote v1 = voteWithPoints(optA, 7);
-        Vote v2 = voteWithPoints(optB, 3);
-
-        List<LiveVoteUpdate.OptionResult> results = service.computeOptionResults(
-                List.of(optA, optB), List.of(v1, v2), VoteMode.POINTS);
-
-        LiveVoteUpdate.OptionResult pizza = find(results, optA.getId());
-        assertThat(pizza.totalPoints()).isEqualTo(7);
-        assertThat(pizza.percentage()).isEqualByComparingTo(BigDecimal.valueOf(70.00));
-    }
-
-    @Test
     void computeOptionResults_noVotes_zeroPercentages() {
         VoteOption optA = option("Pizza");
         VoteOption optB = option("Sushi");
 
         List<LiveVoteUpdate.OptionResult> results = service.computeOptionResults(
-                List.of(optA, optB), List.of(), VoteMode.MAJORITY);
+                List.of(optA, optB), List.of());
 
         results.forEach(r -> assertThat(r.percentage()).isEqualByComparingTo(BigDecimal.ZERO));
     }

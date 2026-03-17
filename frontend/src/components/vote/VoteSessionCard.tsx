@@ -27,7 +27,6 @@ export function VoteSessionCard({
   const queryClient = useQueryClient();
   const router = useRouter();
   const [selectedOption, setSelectedOption] = useState<string | null>(null);
-  const [points, setPoints]                 = useState<Record<string, number>>({});
   const [voted, setVoted]                   = useState(false);
   const [proposalInput, setProposalInput]   = useState('');
 
@@ -64,11 +63,7 @@ export function VoteSessionCard({
 
   const voteMutation = useMutation({
     mutationFn: async () => {
-      const payload =
-        session.mode === 'MAJORITY'  ? { optionId: selectedOption } :
-        session.mode === 'APPROVAL'  ? { optionId: selectedOption } :
-        /* POINTS */                   { votes: Object.entries(points).map(([optionId, p]) => ({ optionId, points: p })) };
-      return voteApi.castVote(session.id, payload);
+      return voteApi.castVote(session.id, { optionId: selectedOption });
     },
     onSuccess: () => {
       setVoted(true);
@@ -86,9 +81,9 @@ export function VoteSessionCard({
   const canVote = !voted && !isClosed && !isPending;
 
   const handleVote = useCallback(() => {
-    if (session.mode !== 'POINTS' && !selectedOption) return;
+    if (!selectedOption) return;
     voteMutation.mutate();
-  }, [session.mode, selectedOption, voteMutation]);
+  }, [selectedOption, voteMutation]);
 
   return (
     <div className="glass rounded-2xl p-5 flex flex-col gap-4">
@@ -100,7 +95,7 @@ export function VoteSessionCard({
             isPending ? 'bg-accent-500/20 text-accent-400' :
                         'bg-primary-500/20 text-primary-400'
           }`}>
-            {session.mode} · {isClosed ? 'Terminé' : isPending ? 'Propositions' : 'En cours'}
+            {isClosed ? 'Terminé' : isPending ? 'Propositions' : 'En cours'}
           </span>
         </div>
         <div className="flex items-center gap-2">
@@ -192,51 +187,23 @@ export function VoteSessionCard({
           >
             <p className="text-xs text-slate-400 font-accent">Votre vote :</p>
 
-            {(session.mode === 'MAJORITY' || session.mode === 'APPROVAL') && (
-              <div className="flex flex-col gap-2">
-                {session.options.map(opt => (
-                  <label key={opt.id} className="flex items-center gap-3 cursor-pointer group">
-                    <input
-                      type={session.mode === 'MAJORITY' ? 'radio' : 'checkbox'}
-                      name="vote"
-                      value={opt.id}
-                      checked={session.mode === 'MAJORITY'
-                        ? selectedOption === opt.id
-                        : Boolean(points[opt.id])}
-                      onChange={() => {
-                        if (session.mode === 'MAJORITY') {
-                          setSelectedOption(opt.id);
-                        } else {
-                          setPoints(p => ({ ...p, [opt.id]: p[opt.id] ? 0 : 1 }));
-                        }
-                      }}
-                      className="accent-primary-500"
-                    />
-                    <span className="text-sm text-slate-300 group-hover:text-white transition-colors">
-                      {opt.label}
-                    </span>
-                  </label>
-                ))}
-              </div>
-            )}
-
-            {session.mode === 'POINTS' && (
-              <div className="flex flex-col gap-2">
-                {session.options.map(opt => (
-                  <div key={opt.id} className="flex items-center gap-3">
-                    <span className="flex-1 text-sm text-slate-300">{opt.label}</span>
-                    <input
-                      type="number"
-                      min={0}
-                      max={10}
-                      value={points[opt.id] ?? 0}
-                      onChange={e => setPoints(p => ({ ...p, [opt.id]: Number(e.target.value) }))}
-                      className="w-16 text-center bg-white/10 border border-white/20 rounded-lg py-1 text-white text-sm"
-                    />
-                  </div>
-                ))}
-              </div>
-            )}
+            <div className="flex flex-col gap-2">
+              {session.options.map(opt => (
+                <label key={opt.id} className="flex items-center gap-3 cursor-pointer group">
+                  <input
+                    type="radio"
+                    name="vote"
+                    value={opt.id}
+                    checked={selectedOption === opt.id}
+                    onChange={() => setSelectedOption(opt.id)}
+                    className="accent-primary-500"
+                  />
+                  <span className="text-sm text-slate-300 group-hover:text-white transition-colors">
+                    {opt.label}
+                  </span>
+                </label>
+              ))}
+            </div>
 
             <button
               onClick={handleVote}

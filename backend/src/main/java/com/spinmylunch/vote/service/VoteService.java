@@ -292,24 +292,9 @@ public class VoteService {
 
     private void validateVoteConstraint(VoteSession session, User voter,
                                         VoteOption option, CastVoteRequest req) {
-        switch (session.getMode()) {
-            case MAJORITY -> {
-                // Un seul vote par session
-                if (voteRepository.existsBySessionIdAndUserId(session.getId(), voter.getId())) {
-                    throw AppException.of(ErrorCode.ALREADY_VOTED);
-                }
-            }
-            case APPROVAL -> {
-                // Un vote par option (mais peut voter plusieurs options)
-                if (voteRepository.existsBySessionIdAndUserIdAndOptionId(
-                        session.getId(), voter.getId(), option.getId())) {
-                    throw AppException.of(ErrorCode.ALREADY_VOTED,
-                            "Vous avez déjà approuvé cette option");
-                }
-            }
-            case POINTS -> {
-                // Peut revoter / modifier — géré librement, pas de contrainte unique
-            }
+        // Un seul vote par session
+        if (voteRepository.existsBySessionIdAndUserId(session.getId(), voter.getId())) {
+            throw AppException.of(ErrorCode.ALREADY_VOTED);
         }
     }
 
@@ -361,7 +346,7 @@ public class VoteService {
         int eligible        = groupMemberRepository.countByGroupId(session.getGroup().getId());
 
         List<LiveVoteUpdate.OptionResult> results =
-                notificationService.computeOptionResults(session.getOptions(), votes, session.getMode());
+                notificationService.computeOptionResults(session.getOptions(), votes);
 
         UUID tiebreakerRouletteId = session.getTiebreakerRoulette() != null
                 ? session.getTiebreakerRoulette().getId() : null;

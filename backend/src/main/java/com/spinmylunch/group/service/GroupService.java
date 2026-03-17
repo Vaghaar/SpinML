@@ -6,6 +6,7 @@ import com.spinmylunch.domain.group.*;
 import com.spinmylunch.domain.user.User;
 import com.spinmylunch.gamification.service.GamificationService;
 import com.spinmylunch.group.dto.*;
+import com.spinmylunch.vote.service.VoteNotificationService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -21,10 +22,11 @@ public class GroupService {
     private static final String INVITE_CHARS = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
     private static final int    INVITE_LEN   = 8;
 
-    private final GroupRepository       groupRepository;
-    private final GroupMemberRepository memberRepository;
-    private final GamificationService   gamificationService;
-    private final SecureRandom          secureRandom = new SecureRandom();
+    private final GroupRepository         groupRepository;
+    private final GroupMemberRepository   memberRepository;
+    private final GamificationService     gamificationService;
+    private final VoteNotificationService voteNotificationService;
+    private final SecureRandom            secureRandom = new SecureRandom();
 
     // ─── Créer ───────────────────────────────────────────────────────────────
 
@@ -61,7 +63,7 @@ public class GroupService {
             throw AppException.of(ErrorCode.VALIDATION_ERROR, "Vous êtes déjà membre de ce groupe");
         }
 
-        memberRepository.save(GroupMember.builder()
+        GroupMember newMember = memberRepository.save(GroupMember.builder()
                 .group(group)
                 .user(user)
                 .role(GroupRole.MEMBER)
@@ -69,6 +71,8 @@ public class GroupService {
 
         gamificationService.awardXpAndCheckBadges(
                 user, GamificationService.XP_INVITE_ACCEPTED, null);
+
+        voteNotificationService.broadcastMemberJoined(group.getId(), newMember);
 
         int count = memberRepository.countByGroupId(group.getId());
         return toResponse(group, count);

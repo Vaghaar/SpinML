@@ -179,6 +179,16 @@ export interface SpinSyncMessage {
   spunAt:           string;
 }
 
+export interface MemberJoinedMessage {
+  groupId:    string;
+  memberId:   string;
+  userId:     string;
+  name:       string;
+  pictureUrl?: string;
+  role:       GroupRole;
+  joinedAt:   string;
+}
+
 export interface RouletteUpdateMessage {
   rouletteId:   string;
   groupId:      string;

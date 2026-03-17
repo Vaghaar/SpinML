@@ -1,8 +1,10 @@
 package com.spinmylunch.vote.service;
 
+import com.spinmylunch.domain.group.GroupMember;
 import com.spinmylunch.domain.group.GroupMemberRepository;
 import com.spinmylunch.domain.roulette.Roulette;
 import com.spinmylunch.domain.vote.*;
+import com.spinmylunch.group.dto.MemberJoinedMessage;
 import com.spinmylunch.roulette.dto.RouletteUpdateMessage;
 import com.spinmylunch.vote.dto.LiveVoteUpdate;
 import com.spinmylunch.vote.dto.SpinSyncMessage;
@@ -46,6 +48,29 @@ public class VoteNotificationService {
         return "/topic/group/" + groupId + "/roulette";
     }
 
+    private static String membersTopic(UUID groupId) {
+        return "/topic/group/" + groupId + "/members";
+    }
+
+    // ─── Member joined ────────────────────────────────────────────────────────
+
+    /**
+     * Diffuse un nouveau membre à tous les membres connectés du groupe.
+     */
+    public void broadcastMemberJoined(UUID groupId, GroupMember member) {
+        MemberJoinedMessage msg = new MemberJoinedMessage(
+                groupId,
+                member.getId(),
+                member.getUser().getId(),
+                member.getUser().getName(),
+                member.getUser().getPictureUrl(),
+                member.getRole(),
+                member.getJoinedAt()
+        );
+        messagingTemplate.convertAndSend(membersTopic(groupId), msg);
+        log.debug("Member joined broadcasté → {} (user={})", membersTopic(groupId), member.getUser().getId());
+    }
+
     // ─── Vote live update ─────────────────────────────────────────────────────
 
     /**
@@ -60,7 +85,7 @@ public class VoteNotificationService {
         int eligible        = groupMemberRepository.countByGroupId(groupId);
 
         List<LiveVoteUpdate.OptionResult> results = computeOptionResults(
-                session.getOptions(), allVotes, session.getMode());
+                session.getOptions(), allVotes);
 
         UUID tiebreakerRouletteId = session.getTiebreakerRoulette() != null
                 ? session.getTiebreakerRoulette().getId() : null;
@@ -133,32 +158,24 @@ public class VoteNotificationService {
     // ─── Calcul des résultats ─────────────────────────────────────────────────
 
     public List<LiveVoteUpdate.OptionResult> computeOptionResults(
-            List<VoteOption> options, List<Vote> votes, VoteMode mode) {
+            List<VoteOption> options, List<Vote> votes) {
 
         // Regrouper les votes par option
         Map<UUID, List<Vote>> votesByOption = new HashMap<>();
         for (VoteOption opt : options) votesByOption.put(opt.getId(), new ArrayList<>());
         for (Vote v : votes) votesByOption.computeIfAbsent(v.getOption().getId(), k -> new ArrayList<>()).add(v);
 
-        // Score total pour calculer les pourcentages
-        double totalScore = switch (mode) {
-            case MAJORITY  -> votesByOption.values().stream().mapToLong(List::size).sum();
-            case APPROVAL  -> votesByOption.values().stream().mapToLong(List::size).sum();
-            case POINTS    -> votes.stream().mapToInt(Vote::getPoints).sum();
-        };
+        double totalScore = votesByOption.values().stream().mapToLong(List::size).sum();
 
         List<LiveVoteUpdate.OptionResult> results = new ArrayList<>();
         for (VoteOption opt : options) {
             List<Vote> optVotes = votesByOption.getOrDefault(opt.getId(), List.of());
             int count      = optVotes.size();
-            int totalPts   = optVotes.stream().mapToInt(Vote::getPoints).sum();
-
-            double score   = (mode == VoteMode.POINTS) ? totalPts : count;
             BigDecimal pct = totalScore > 0
-                    ? BigDecimal.valueOf((score / totalScore) * 100).setScale(2, RoundingMode.HALF_UP)
+                    ? BigDecimal.valueOf((count / totalScore) * 100).setScale(2, RoundingMode.HALF_UP)
                     : BigDecimal.ZERO;
 
-            results.add(new LiveVoteUpdate.OptionResult(opt.getId(), opt.getLabel(), count, totalPts, pct));
+            results.add(new LiveVoteUpdate.OptionResult(opt.getId(), opt.getLabel(), count, 0, pct));
         }
         return results;
     }
@@ -168,18 +185,12 @@ public class VoteNotificationService {
      */
     public List<VoteOption> findTiedOptions(VoteSession session, List<Vote> votes) {
         List<LiveVoteUpdate.OptionResult> results =
-                computeOptionResults(session.getOptions(), votes, session.getMode());
+                computeOptionResults(session.getOptions(), votes);
 
-        double maxScore = switch (session.getMode()) {
-            case POINTS   -> results.stream().mapToDouble(r -> r.totalPoints()).max().orElse(0);
-            default       -> results.stream().mapToDouble(r -> r.voteCount()).max().orElse(0);
-        };
+        double maxScore = results.stream().mapToDouble(r -> r.voteCount()).max().orElse(0);
 
         List<UUID> tiedIds = results.stream()
-                .filter(r -> {
-                    double score = (session.getMode() == VoteMode.POINTS) ? r.totalPoints() : r.voteCount();
-                    return score == maxScore && maxScore > 0;
-                })
+                .filter(r -> r.voteCount() == maxScore && maxScore > 0)
                 .map(LiveVoteUpdate.OptionResult::optionId)
                 .toList();
 

@@ -1,12 +1,9 @@
 'use client';
 
-import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useMutation } from '@tanstack/react-query';
 import { voteApi } from '@/lib/api';
 import { toast } from '@/components/ui/Toast';
-import type { VoteMode } from '@/types';
-
 interface CreateVoteSessionModalProps {
   groupId:   string;
   open:      boolean;
@@ -14,17 +11,9 @@ interface CreateVoteSessionModalProps {
   onCreated: () => void;
 }
 
-const MODES: { value: VoteMode; label: string; desc: string }[] = [
-  { value: 'MAJORITY', label: 'Majorité',  desc: '1 vote par personne — le plus voté gagne' },
-  { value: 'APPROVAL', label: 'Approbation', desc: 'Approuvez autant d\'options que vous voulez' },
-  { value: 'POINTS',   label: 'Points',    desc: 'Distribuez des points entre les options' },
-];
-
 export function CreateVoteSessionModal({ groupId, open, onClose, onCreated }: CreateVoteSessionModalProps) {
-  const [mode, setMode] = useState<VoteMode>('MAJORITY');
-
   const mutation = useMutation({
-    mutationFn: () => voteApi.createSession({ groupId, mode }),
+    mutationFn: () => voteApi.createSession({ groupId, mode: 'MAJORITY' }),
     onSuccess: () => {
       toast.success('Vote créé !', 'Les membres peuvent maintenant proposer leurs idées.');
       onCreated();
@@ -52,27 +41,6 @@ export function CreateVoteSessionModal({ groupId, open, onClose, onCreated }: Cr
               <div className="flex items-center justify-between">
                 <h2 className="font-title font-bold text-white text-xl">Nouveau vote</h2>
                 <button onClick={onClose} className="text-slate-400 hover:text-white transition-colors text-lg">✕</button>
-              </div>
-
-              <div className="flex flex-col gap-2">
-                <p className="text-xs text-slate-400 uppercase tracking-wider">Mode de vote</p>
-                {MODES.map(m => (
-                  <label key={m.value}
-                    className={`flex items-start gap-3 p-3 rounded-xl cursor-pointer transition-all border ${
-                      mode === m.value
-                        ? 'border-primary-500/60 bg-primary-500/10'
-                        : 'border-white/5 hover:border-white/15'
-                    }`}>
-                    <input type="radio" name="mode" value={m.value}
-                      checked={mode === m.value}
-                      onChange={() => setMode(m.value)}
-                      className="mt-0.5 accent-primary-500" />
-                    <div>
-                      <p className="text-sm text-white font-semibold">{m.label}</p>
-                      <p className="text-xs text-slate-400 mt-0.5">{m.desc}</p>
-                    </div>
-                  </label>
-                ))}
               </div>
 
               <div className="glass rounded-xl p-3 flex items-start gap-2">

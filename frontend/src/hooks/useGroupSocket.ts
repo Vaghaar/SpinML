@@ -4,18 +4,19 @@ import { useEffect, useRef } from 'react';
 import { Client, type IMessage } from '@stomp/stompjs';
 import SockJS from 'sockjs-client';
 import { useAuthStore } from '@/stores/authStore';
-import type { LiveVoteUpdate, SpinSyncMessage, RouletteUpdateMessage } from '@/types';
+import type { LiveVoteUpdate, SpinSyncMessage, RouletteUpdateMessage, MemberJoinedMessage } from '@/types';
 
 const BASE_URL = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:8080';
 
 interface UseGroupSocketOptions {
   groupId:           string | null;
-  onVoteUpdate?:     (update: LiveVoteUpdate)     => void;
-  onSpinSync?:       (msg: SpinSyncMessage)       => void;
-  onRouletteUpdate?: (msg: RouletteUpdateMessage) => void;
+  onVoteUpdate?:     (update: LiveVoteUpdate)       => void;
+  onSpinSync?:       (msg: SpinSyncMessage)         => void;
+  onRouletteUpdate?: (msg: RouletteUpdateMessage)   => void;
+  onMemberJoined?:   (msg: MemberJoinedMessage)     => void;
 }
 
-export function useGroupSocket({ groupId, onVoteUpdate, onSpinSync, onRouletteUpdate }: UseGroupSocketOptions) {
+export function useGroupSocket({ groupId, onVoteUpdate, onSpinSync, onRouletteUpdate, onMemberJoined }: UseGroupSocketOptions) {
   const clientRef    = useRef<Client | null>(null);
   const accessToken  = useAuthStore((s) => s.accessToken);
 
@@ -24,10 +25,12 @@ export function useGroupSocket({ groupId, onVoteUpdate, onSpinSync, onRouletteUp
   const onVoteUpdateRef     = useRef(onVoteUpdate);
   const onSpinSyncRef       = useRef(onSpinSync);
   const onRouletteUpdateRef = useRef(onRouletteUpdate);
+  const onMemberJoinedRef   = useRef(onMemberJoined);
 
   useEffect(() => { onVoteUpdateRef.current     = onVoteUpdate;     });
   useEffect(() => { onSpinSyncRef.current       = onSpinSync;       });
   useEffect(() => { onRouletteUpdateRef.current = onRouletteUpdate; });
+  useEffect(() => { onMemberJoinedRef.current   = onMemberJoined;   });
 
   useEffect(() => {
     if (!groupId || !accessToken) return;
@@ -51,6 +54,11 @@ export function useGroupSocket({ groupId, onVoteUpdate, onSpinSync, onRouletteUp
         // Propositions de roulette + démarrage
         client.subscribe(`/topic/group/${groupId}/roulette`, (msg: IMessage) => {
           try { onRouletteUpdateRef.current?.(JSON.parse(msg.body)); } catch {}
+        });
+
+        // Nouveau membre dans le groupe
+        client.subscribe(`/topic/group/${groupId}/members`, (msg: IMessage) => {
+          try { onMemberJoinedRef.current?.(JSON.parse(msg.body)); } catch {}
         });
       },
 

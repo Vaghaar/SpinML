@@ -17,7 +17,7 @@ import { RouletteWheel }                   from '@/components/roulette/RouletteW
 import { SpinResultCard }                  from '@/components/roulette/SpinResultCard';
 import { TopFoodsChart }                    from '@/components/charts/TopFoodsChart';
 import { useSpinAnimation }                from '@/hooks/useSpinAnimation';
-import type { GroupMember, VoteSession, LiveVoteUpdate, StatsResponse, Roulette, RouletteUpdateMessage, SpinSyncMessage, Segment } from '@/types';
+import type { GroupMember, VoteSession, LiveVoteUpdate, StatsResponse, Roulette, RouletteUpdateMessage, SpinSyncMessage, Segment, MemberJoinedMessage } from '@/types';
 
 // ─── Tabs ─────────────────────────────────────────────────────────────────────
 
@@ -163,11 +163,17 @@ export default function GroupPage() {
     setShowOverlayResult(false);
   }, []);
 
+  const handleMemberJoined = useCallback((msg: MemberJoinedMessage) => {
+    queryClient.invalidateQueries({ queryKey: ['group-members', id] });
+    queryClient.invalidateQueries({ queryKey: ['group', id] });
+  }, [queryClient, id]);
+
   useGroupSocket({
     groupId: id,
     onVoteUpdate:     handleVoteUpdate,
     onRouletteUpdate: handleRouletteUpdate,
     onSpinSync:       handleSpinSync,
+    onMemberJoined:   handleMemberJoined,
   });
 
   // ─── QR code ──────────────────────────────────────────────────────────────
